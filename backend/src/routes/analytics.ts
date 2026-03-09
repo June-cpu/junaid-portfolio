@@ -12,16 +12,21 @@ router.get('/', async (_req: Request, res: Response) => {
   const [
     totalVisits,
     uniqueVisitors,
+    liveVisitors,
     topClicks,
     avgDuration,
     byDay,
     recent,
+    topIPs,
   ] = await Promise.all([
     // Total visit count
     pool.query(`SELECT COUNT(*) AS count FROM events WHERE type = 'visit'`),
 
     // Unique visitors by IP
     pool.query(`SELECT COUNT(DISTINCT ip) AS count FROM events WHERE type = 'visit' AND ip IS NOT NULL`),
+
+    // Live visitors — unique IPs with any event in last 5 minutes
+    pool.query(`SELECT COUNT(DISTINCT ip) AS count FROM events WHERE created_at >= NOW() - INTERVAL '5 minutes' AND ip IS NOT NULL`),
 
     // Most clicked elements
     pool.query(`
@@ -52,25 +57,38 @@ router.get('/', async (_req: Request, res: Response) => {
       FROM events
       WHERE created_at >= NOW() - INTERVAL '30 days'
       GROUP BY day
-      ORDER BY day DESC
+      ORDER BY day ASC
     `),
 
-    // Recent 20 events with full detail
+    // Recent 20 visit events with full detail
     pool.query(`
       SELECT id, type, data, ip, user_agent, created_at
       FROM events
+      WHERE type = 'visit'
       ORDER BY created_at DESC
       LIMIT 20
+    `),
+
+    // Top IPs by visit count
+    pool.query(`
+      SELECT ip, COUNT(*) AS count
+      FROM events
+      WHERE type = 'visit' AND ip IS NOT NULL
+      GROUP BY ip
+      ORDER BY count DESC
+      LIMIT 10
     `),
   ]);
 
   res.json({
     totalVisits: parseInt(totalVisits.rows[0].count, 10),
     uniqueVisitors: parseInt(uniqueVisitors.rows[0].count, 10),
+    liveVisitors: parseInt(liveVisitors.rows[0].count, 10),
     topClicks: topClicks.rows,
     avgSessionDuration: avgDuration.rows[0].avg_seconds ?? 0,
     byDay: byDay.rows,
     recentEvents: recent.rows,
+    topIPs: topIPs.rows,
   });
 });
 
