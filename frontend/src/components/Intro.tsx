@@ -12,7 +12,11 @@ export default function Intro() {
 
   // Visit + session duration tracking
   useEffect(() => {
-    track('visit', { page: 'home' });
+    track('visit', {
+      page: 'home',
+      referrer: document.referrer,
+      userAgent: navigator.userAgent,
+    });
     const start = Date.now();
     return () => {
       track('duration', { duration: Math.round((Date.now() - start) / 1000) });
@@ -166,7 +170,7 @@ export default function Intro() {
               marginTop: 40, display: 'flex', alignItems: 'center', gap: 28,
               animation: 'fadeUp 0.9s ease forwards', opacity: 0, animationDelay: '0.75s'
             }}>
-              <a href="#work" onClick={() => track('click', { element: 'view-work-btn' })} onMouseEnter={onEnter} onMouseLeave={onLeave}
+              <a href="#work" onClick={() => track('click', { element: 'view_work_btn' })} onMouseEnter={onEnter} onMouseLeave={onLeave}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 10,
                   padding: '13px 26px', background: 'var(--ink)', color: 'var(--cream)',
@@ -181,7 +185,7 @@ export default function Intro() {
               <a
                 href="https://github.com/June-cpu"
                 target="_blank" rel="noreferrer"
-                onClick={() => track('click', { element: 'github-hero' })}
+                onClick={() => track('click', { element: 'github_link' })}
                 onMouseEnter={onEnter} onMouseLeave={onLeave}
                 style={{
                   fontSize: '0.65rem', letterSpacing: '0.1em', color: 'var(--ink-light)',
@@ -237,7 +241,7 @@ export default function Intro() {
             position: 'relative', overflow: 'hidden',
             animation: 'panelReveal 1.2s ease forwards', animationDelay: '0.05s'
           }}
-          onMouseEnter={() => { setShowInfo(true); track('hover', { element: 'intro-photo' }); }}
+          onMouseEnter={() => { setShowInfo(true); track('hover', { element: 'photo_panel' }); }}
           onMouseLeave={() => setShowInfo(false)}
         >
           {/* Photo */}
