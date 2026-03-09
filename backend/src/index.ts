@@ -11,15 +11,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-const allowedOrigins = process.env.FRONTEND_URL
-  ? [process.env.FRONTEND_URL, `https://www.${process.env.FRONTEND_URL.replace('https://', '')}`]
-  : ['http://localhost:3000'];
-
 app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error('Not allowed by CORS'));
-  },
+  origin: [
+    'http://localhost:3000',
+    'https://junaidtafader.com',
+    'https://www.junaidtafader.com',
+  ],
+  credentials: true,
 }));
 app.use(express.json());
 
