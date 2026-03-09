@@ -4,17 +4,18 @@ import jwt from 'jsonwebtoken';
 
 const router = Router();
 
-// Store the hashed password lazily so we hash once on first request
 let hashedAdminPassword: string | null = null;
 
 async function getHashedPassword(): Promise<string> {
+  if (!process.env.ADMIN_PASSWORD) {
+    throw new Error('ADMIN_PASSWORD env var is not set');
+  }
   if (!hashedAdminPassword) {
-    hashedAdminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD as string, 10);
+    hashedAdminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
   }
   return hashedAdminPassword;
 }
 
-// POST /api/auth/login
 router.post('/login', async (req: Request, res: Response) => {
   const { password } = req.body as { password?: string };
 
@@ -23,21 +24,30 @@ router.post('/login', async (req: Request, res: Response) => {
     return;
   }
 
-  const hashed = await getHashedPassword();
-  const match = await bcrypt.compare(password, hashed);
+  try {
+    const hashed = await getHashedPassword();
+    const match = await bcrypt.compare(password, hashed);
 
-  if (!match) {
-    res.status(401).json({ error: 'Invalid password' });
-    return;
+    if (!match) {
+      res.status(401).json({ error: 'Invalid password' });
+      return;
+    }
+
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET env var is not set');
+    }
+
+    const token = jwt.sign(
+      { role: 'admin' },
+      process.env.JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+
+    res.json({ token });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Internal server error', detail: String(err) });
   }
-
-  const token = jwt.sign(
-    { role: 'admin' },
-    process.env.JWT_SECRET as string,
-    { expiresIn: '8h' }
-  );
-
-  res.json({ token });
 });
 
 export default router;
