@@ -22,14 +22,31 @@ html {
   height: 100%;
 }
 
+@media (min-width: 1440px) {
+  html {
+    font-size: 110%;
+  }
+}
+
 body {
   width: 100%;
   min-height: 100%;
   background: var(--cream);
   color: var(--ink);
   font-family: 'DM Mono', monospace;
-  overflow-x: hidden;
   cursor: none;
+}
+
+@media (min-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    cursor: auto;
+  }
 }
 
 /* Grain overlay */

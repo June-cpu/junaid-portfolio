@@ -5,6 +5,22 @@ import { useRouter } from 'next/navigation';
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 
+const useBreakpoint = () => {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    setWidth(window.innerWidth);
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return {
+    isMobile: width < 768,
+    isTablet: width >= 768 && width < 1024,
+    isDesktop: width >= 1024,
+    isLargeDesktop: width >= 1440,
+  };
+};
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface DayRow {
@@ -184,6 +200,7 @@ export default function AdminDashboard() {
   const [data, setData] = useState<Analytics | null>(null);
   const [error, setError] = useState('');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const { isMobile, isTablet } = useBreakpoint();
 
   const fetchData = useCallback(async (token: string) => {
     try {
@@ -260,6 +277,12 @@ export default function AdminDashboard() {
     );
   }
 
+  const statCardCols = isMobile || isTablet ? '1fr 1fr' : 'repeat(4, 1fr)';
+  const chartsCols = isMobile ? '1fr' : '2fr 1fr';
+  const bottomCols = isMobile ? '1fr' : '2fr 1fr';
+  const navPad = isMobile ? '14px 20px' : '18px 40px';
+  const tableHeaders = isMobile ? ['Time', 'IP', 'Page'] : ['Time', 'IP', 'Device', 'Page'];
+
   return (
     <div style={{
       minHeight: '100vh', background: '#0f0f0f',
@@ -268,20 +291,20 @@ export default function AdminDashboard() {
 
       {/* ── Nav ── */}
       <div style={{
-        borderBottom: '1px solid #1e1e1e', padding: '18px 40px',
+        borderBottom: '1px solid #1e1e1e', padding: navPad,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         position: 'sticky', top: 0, background: '#0f0f0f', zIndex: 10,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 20 }}>
           <span style={{ fontSize: '0.6rem', letterSpacing: '0.14em', color: '#f2ede6' }}>
-            junaidtafader.com
+            {isMobile ? 'jt.com' : 'junaidtafader.com'}
           </span>
           <span style={{ fontSize: '0.5rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c4572a' }}>
             / Analytics
           </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          {lastRefresh && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 12 : 24 }}>
+          {lastRefresh && !isMobile && (
             <span style={{ fontSize: '0.5rem', letterSpacing: '0.1em', color: 'rgba(242,237,230,0.25)' }}>
               Updated {timeAgo(lastRefresh.toISOString())}
             </span>
@@ -292,6 +315,7 @@ export default function AdminDashboard() {
               background: 'transparent', border: 'none',
               fontSize: '0.52rem', letterSpacing: '0.12em', textTransform: 'uppercase',
               color: 'rgba(242,237,230,0.4)', cursor: 'pointer', padding: '4px 0',
+              minHeight: 44,
             }}
           >
             Refresh
@@ -302,6 +326,7 @@ export default function AdminDashboard() {
               background: 'transparent', border: '1px solid #2a2a2a',
               fontSize: '0.52rem', letterSpacing: '0.12em', textTransform: 'uppercase',
               color: 'rgba(242,237,230,0.4)', cursor: 'pointer', padding: '6px 14px',
+              minHeight: 44,
             }}
           >
             Logout
@@ -309,10 +334,10 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 40px 80px' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: isMobile ? '24px 16px 64px' : '40px 40px 80px' }}>
 
         {/* ── Stat Cards ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 40 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: statCardCols, gap: 1, marginBottom: 40 }}>
           <StatCard
             label="Total Visitors"
             value={data!.totalVisits.toLocaleString()}
@@ -336,10 +361,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* ── Charts row ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 1, marginBottom: 1 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: chartsCols, gap: 1, marginBottom: 1 }}>
 
           {/* Visits over time */}
-          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', padding: '28px 32px' }}>
+          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', padding: isMobile ? '20px 16px' : '28px 32px' }}>
             <div style={{
               fontSize: '0.5rem', letterSpacing: '0.22em', textTransform: 'uppercase',
               color: 'rgba(242,237,230,0.35)', marginBottom: 28,
@@ -356,7 +381,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Top clicks */}
-          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', padding: '28px 32px' }}>
+          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', padding: isMobile ? '20px 16px' : '28px 32px' }}>
             <div style={{
               fontSize: '0.5rem', letterSpacing: '0.22em', textTransform: 'uppercase',
               color: 'rgba(242,237,230,0.35)', marginBottom: 28,
@@ -374,10 +399,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* ── Bottom row ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 1, marginTop: 1 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: bottomCols, gap: 1, marginTop: 1 }}>
 
           {/* Recent visitors */}
-          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', padding: '28px 32px' }}>
+          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', padding: isMobile ? '20px 16px' : '28px 32px' }}>
             <div style={{
               fontSize: '0.5rem', letterSpacing: '0.22em', textTransform: 'uppercase',
               color: 'rgba(242,237,230,0.35)', marginBottom: 28,
@@ -390,7 +415,7 @@ export default function AdminDashboard() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.58rem' }}>
                   <thead>
                     <tr>
-                      {['Time', 'IP', 'Device', 'Page'].map(h => (
+                      {tableHeaders.map(h => (
                         <th key={h} style={{
                           textAlign: 'left', padding: '0 0 12px',
                           fontSize: '0.48rem', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -411,9 +436,11 @@ export default function AdminDashboard() {
                         <td style={{ padding: '10px 0', color: '#f2ede6', paddingRight: 24, whiteSpace: 'nowrap' }}>
                           {ev.ip || '—'}
                         </td>
-                        <td style={{ padding: '10px 0', color: 'rgba(242,237,230,0.55)', paddingRight: 24, whiteSpace: 'nowrap' }}>
-                          {parseUA(ev.user_agent)}
-                        </td>
+                        {!isMobile && (
+                          <td style={{ padding: '10px 0', color: 'rgba(242,237,230,0.55)', paddingRight: 24, whiteSpace: 'nowrap' }}>
+                            {parseUA(ev.user_agent)}
+                          </td>
+                        )}
                         <td style={{ padding: '10px 0', color: 'rgba(242,237,230,0.4)' }}>
                           {(ev.data?.page as string) || '/'}
                         </td>
@@ -429,59 +456,61 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          {/* Top IPs */}
-          <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', padding: '28px 32px' }}>
-            <div style={{
-              fontSize: '0.5rem', letterSpacing: '0.22em', textTransform: 'uppercase',
-              color: 'rgba(242,237,230,0.35)', marginBottom: 28,
-            }}>
-              — Top Visitors
-            </div>
+          {/* Top IPs — hidden on mobile */}
+          {!isMobile && (
+            <div style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', padding: '28px 32px' }}>
+              <div style={{
+                fontSize: '0.5rem', letterSpacing: '0.22em', textTransform: 'uppercase',
+                color: 'rgba(242,237,230,0.35)', marginBottom: 28,
+              }}>
+                — Top Visitors
+              </div>
 
-            {data!.topIPs.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {data!.topIPs.map((row, i) => (
-                  <div key={row.ip} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: '0.48rem', color: '#c4572a', letterSpacing: '0.1em' }}>
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <span style={{ fontSize: '0.58rem', color: 'rgba(242,237,230,0.65)', letterSpacing: '0.04em' }}>
-                        {row.ip}
+              {data!.topIPs.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {data!.topIPs.map((row, i) => (
+                    <div key={row.ip} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: '0.48rem', color: '#c4572a', letterSpacing: '0.1em' }}>
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span style={{ fontSize: '0.58rem', color: 'rgba(242,237,230,0.65)', letterSpacing: '0.04em' }}>
+                          {row.ip}
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '0.52rem', color: 'rgba(242,237,230,0.4)',
+                        background: '#111', padding: '2px 8px', letterSpacing: '0.08em',
+                      }}>
+                        {row.count}×
                       </span>
                     </div>
-                    <span style={{
-                      fontSize: '0.52rem', color: 'rgba(242,237,230,0.4)',
-                      background: '#111', padding: '2px 8px', letterSpacing: '0.08em',
-                    }}>
-                      {row.count}×
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ fontSize: '0.6rem', color: 'rgba(242,237,230,0.2)', padding: '40px 0', textAlign: 'center' }}>
-                No data yet
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '0.6rem', color: 'rgba(242,237,230,0.2)', padding: '40px 0', textAlign: 'center' }}>
+                  No data yet
+                </div>
+              )}
 
-            {/* Live indicator */}
-            <div style={{
-              marginTop: 32, paddingTop: 20, borderTop: '1px solid #2a2a2a',
-              display: 'flex', alignItems: 'center', gap: 8,
-              fontSize: '0.52rem', letterSpacing: '0.1em', color: 'rgba(242,237,230,0.3)',
-            }}>
-              <span style={{
-                width: 6, height: 6, borderRadius: '50%',
-                background: data!.liveVisitors > 0 ? '#5a9a5a' : '#444',
-                display: 'inline-block',
-                boxShadow: data!.liveVisitors > 0 ? '0 0 6px #5a9a5a' : 'none',
-              }} />
-              {data!.liveVisitors > 0
-                ? `${data!.liveVisitors} active right now`
-                : 'No active visitors'}
+              {/* Live indicator */}
+              <div style={{
+                marginTop: 32, paddingTop: 20, borderTop: '1px solid #2a2a2a',
+                display: 'flex', alignItems: 'center', gap: 8,
+                fontSize: '0.52rem', letterSpacing: '0.1em', color: 'rgba(242,237,230,0.3)',
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: data!.liveVisitors > 0 ? '#5a9a5a' : '#444',
+                  display: 'inline-block',
+                  boxShadow: data!.liveVisitors > 0 ? '0 0 6px #5a9a5a' : 'none',
+                }} />
+                {data!.liveVisitors > 0
+                  ? `${data!.liveVisitors} active right now`
+                  : 'No active visitors'}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
       </div>
