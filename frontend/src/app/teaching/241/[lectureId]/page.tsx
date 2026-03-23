@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { LECTURE_MAP, LECTURES, Slide } from '@/lib/teachingData';
+import { LECTURE_MAP, LECTURES, Slide, VisualCard } from '@/lib/teachingData';
 
 // ─── Slide Renderers ──────────────────────────────────────────────────────────
 
@@ -502,6 +502,83 @@ function ChallengeSlide({ slide }: { slide: Slide }) {
   );
 }
 
+function VisualSlide({ slide }: { slide: Slide }) {
+  const cards = slide.cards ?? [];
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: 'var(--cream)',
+      display: 'flex', flexDirection: 'column',
+      justifyContent: 'center',
+      padding: 'clamp(40px, 6vw, 96px)',
+      overflow: 'auto',
+    }}>
+      {slide.label && (
+        <div style={{
+          fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase',
+          color: 'var(--accent)', marginBottom: 20,
+          display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <span style={{ display: 'block', width: 28, height: 1, background: 'var(--accent)' }} />
+          {slide.label}
+        </div>
+      )}
+
+      <h2 style={{
+        fontFamily: 'Cormorant Garamond, serif', fontWeight: 300,
+        fontSize: 'clamp(1.8rem, 4vw, 3.6rem)',
+        lineHeight: 1.05, letterSpacing: '-0.02em',
+        color: 'var(--ink)', marginBottom: slide.body ? 16 : 36,
+      }}>
+        {slide.heading}
+      </h2>
+
+      {slide.body && (
+        <p style={{
+          fontSize: '0.72rem', lineHeight: 1.9, color: 'var(--ink-light)',
+          maxWidth: 620, fontWeight: 300, marginBottom: 40,
+        }}>
+          {slide.body}
+        </p>
+      )}
+
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${Math.min(cards.length, 4)}, 1fr)`,
+        gap: 16,
+        maxWidth: 900,
+      }}>
+        {cards.map((card: VisualCard, i: number) => (
+          <div key={i} style={{
+            background: 'var(--cream-dark)',
+            border: '1px solid var(--ink-faint)',
+            borderTop: '3px solid var(--accent)',
+            padding: '24px 20px',
+            display: 'flex', flexDirection: 'column', gap: 10,
+          }}>
+            <span style={{ fontSize: 'clamp(1.8rem, 3vw, 2.6rem)', lineHeight: 1 }}>{card.icon}</span>
+            <div style={{
+              fontFamily: 'Cormorant Garamond, serif', fontWeight: 400,
+              fontSize: 'clamp(1rem, 1.6vw, 1.3rem)',
+              color: 'var(--ink)', letterSpacing: '-0.01em',
+            }}>
+              {card.title}
+            </div>
+            {card.body && (
+              <p style={{
+                fontSize: '0.62rem', lineHeight: 1.7, color: 'var(--ink-light)',
+                fontWeight: 300, marginTop: 4,
+              }}>
+                {card.body}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SlideRenderer({ slide, lectureNum, lectureTheme }: {
   slide: Slide;
   lectureNum: number;
@@ -524,6 +601,8 @@ function SlideRenderer({ slide, lectureNum, lectureTheme }: {
       return <ProjectSlide slide={slide} />;
     case 'challenge':
       return <ChallengeSlide slide={slide} />;
+    case 'visual':
+      return <VisualSlide slide={slide} />;
     default:
       return <ConceptSlide slide={slide} />;
   }
@@ -563,6 +642,7 @@ export default function LecturePage() {
 
   // Nav bar color depends on current slide background
   const darkSlide = slide.type === 'title' || slide.type === 'video' || slide.type === 'challenge';
+
   const navBg = darkSlide ? 'rgba(15,15,15,0.95)' : 'rgba(242,237,230,0.95)';
   const navColor = darkSlide ? 'rgba(242,237,230,0.6)' : 'var(--ink-light)';
   const navAccent = darkSlide ? '#f2ede6' : 'var(--ink)';

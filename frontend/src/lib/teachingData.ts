@@ -1,8 +1,14 @@
-export type SlideType = 'title' | 'question' | 'rules' | 'concept' | 'examples' | 'video' | 'project' | 'challenge';
+export type SlideType = 'title' | 'question' | 'rules' | 'concept' | 'examples' | 'video' | 'project' | 'challenge' | 'visual';
 
 export interface VideoLink {
   label: string;
   url: string;
+}
+
+export interface VisualCard {
+  icon: string;
+  title: string;
+  body?: string;
 }
 
 export interface Slide {
@@ -14,6 +20,7 @@ export interface Slide {
   videos?: VideoLink[];
   projectLink?: { label: string; url: string };
   challengeNum?: number;
+  cards?: VisualCard[];
 }
 
 export interface Lecture {
@@ -559,12 +566,16 @@ export const LECTURES: Lecture[] = [
         body: "What do we do when things don't work? How do great builders and engineers think about failure?",
       },
       {
-        type: 'video',
-        label: '— Videos',
-        heading: 'Flying Machine',
-        body: 'How does he take a simple toy and improve on it? What were the results?',
-        videos: [
-          { label: 'Flying Machine', url: 'https://www.youtube.com/watch?v=BO_YGcSzJdA' },
+        type: 'visual',
+        label: '— The Improvement Loop',
+        heading: 'How Great Builders Think',
+        body: 'Every engineer follows this loop. You never just build once — you keep going around until it works great!',
+        cards: [
+          { icon: '🔨', title: 'Build', body: 'Put it together — even if it is not perfect yet' },
+          { icon: '🧪', title: 'Test', body: 'Try it out. Does it work the way you wanted?' },
+          { icon: '👀', title: 'Observe', body: 'Watch carefully. What goes wrong? What goes right?' },
+          { icon: '💡', title: 'Improve', body: 'Change one thing. Make it better.' },
+          { icon: '🔁', title: 'Repeat', body: 'Go back to the start. Every loop makes it stronger!' },
         ],
       },
       {
@@ -616,11 +627,15 @@ export const LECTURES: Lecture[] = [
         body: "What do we do when things don't work? How do we stay patient and keep improving?",
       },
       {
-        type: 'video',
-        label: '— Videos',
-        heading: 'Space Satellite',
-        videos: [
-          { label: 'Space Satellite', url: 'https://www.youtube.com/watch?v=6KcV1C1Ui5s' },
+        type: 'visual',
+        label: '— How Line Following Works',
+        heading: 'The Robot Reads the Floor',
+        body: 'A color sensor looks at the ground 100+ times per second. Here is what happens inside the robot brain:',
+        cards: [
+          { icon: '⚫', title: 'Sees Black', body: 'The sensor detects a dark surface — it is on the line!' },
+          { icon: '⚪', title: 'Sees White', body: 'The sensor detects a light surface — it has drifted off the line.' },
+          { icon: '↩️', title: 'Correct Course', body: 'The robot steers back toward the line automatically.' },
+          { icon: '🔁', title: 'Super Fast Loop', body: 'This happens hundreds of times per second — too fast to see!' },
         ],
       },
       {
@@ -733,12 +748,15 @@ export const LECTURES: Lecture[] = [
         body: 'Why would people want pets? What do pets provide that machines cannot — or can they?',
       },
       {
-        type: 'video',
-        label: '— Videos',
-        heading: 'Robot Buddies',
-        videos: [
-          { label: 'Robot Buddy #1', url: 'https://www.youtube.com/watch?v=IC13NJqWMm4' },
-          { label: 'Robot Buddy #2', url: 'https://www.youtube.com/watch?v=4xD9QCBkxAs' },
+        type: 'visual',
+        label: '— What Makes a Great Companion?',
+        heading: 'Pets vs. Robot Pets',
+        body: 'Let us compare a real pet to a robot pet. What does each one give you?',
+        cards: [
+          { icon: '🐕', title: 'Real Pet', body: 'Loves you, needs food and walks, feels real emotions' },
+          { icon: '🤖', title: 'Robot Pet', body: 'Never gets sick, always available, you program its behavior' },
+          { icon: '💛', title: 'What Both Give', body: 'Companionship, a reason to care for something, and fun!' },
+          { icon: '🤔', title: 'Big Question', body: 'Can a robot ever truly be a friend? What do you think?' },
         ],
       },
       {
@@ -790,12 +808,15 @@ export const LECTURES: Lecture[] = [
         body: 'Think about safes, locks, vaults, and security systems. What design principles make something secure?',
       },
       {
-        type: 'video',
-        label: '— Videos',
-        heading: 'Bank Vaults',
-        videos: [
-          { label: 'Bank Vaults #1', url: 'https://www.youtube.com/watch?v=IC13NJqWMm4' },
-          { label: 'Bank Vaults #2', url: 'https://www.youtube.com/watch?v=4xD9QCBkxAs' },
+        type: 'visual',
+        label: '— How Do Locks Work?',
+        heading: 'Types of Security',
+        body: 'Vaults and locks use different methods to keep things safe. Here are the most common ones:',
+        cards: [
+          { icon: '🔑', title: 'Key Lock', body: 'A shaped key moves tumblers inside to unlock — only the right shape works' },
+          { icon: '🔢', title: 'Combination', body: 'Turn to the right numbers in the right order — no key needed!' },
+          { icon: '👆', title: 'Fingerprint', body: 'Scans your unique fingerprint — only YOUR finger opens it' },
+          { icon: '🚨', title: 'Sensor Guard', body: 'Detects motion, weight, or sound — triggers an alarm if something moves' },
         ],
       },
       {
