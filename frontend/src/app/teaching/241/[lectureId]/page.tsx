@@ -1,7 +1,7 @@
 'use client';
 
-import { use, useEffect, useState, useCallback } from 'react';
-import { notFound } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+import { notFound, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { LECTURE_MAP, LECTURES, Slide } from '@/lib/teachingData';
 
@@ -531,8 +531,8 @@ function SlideRenderer({ slide, lectureNum, lectureTheme }: {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-export default function LecturePage({ params }: { params: Promise<{ lectureId: string }> }) {
-  const { lectureId } = use(params);
+export default function LecturePage() {
+  const { lectureId } = useParams<{ lectureId: string }>();
   const lecture = LECTURE_MAP[lectureId];
   if (!lecture) notFound();
 
