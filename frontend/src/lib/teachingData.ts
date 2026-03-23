@@ -982,103 +982,186 @@ export const LECTURES: Lecture[] = [
     id: 'lec8',
     num: 8,
     title: 'Fixing Broken Robots',
-    theme: "Builder's Mindset",
+    theme: "Debugging & Builder's Mindset",
     slides: [
-      { type: 'title', heading: 'Fixing Broken Robots', label: 'Lesson 8' },
+      // ── TITLE ──
+      { type: 'title', heading: 'Fixing Broken\nRobots', label: 'Lesson 8' },
+
+      // ── OBJECTIVE ──
       {
-        type: 'question',
-        label: '— Question of the Day',
-        heading: 'When Things Break',
-        body: 'Have you ever broken something you really liked? What did you do after — did you fix it, give up, or ask for help?',
+        type: 'concept',
+        label: '— Objective',
+        heading: 'What We Will Learn Today',
+        body: 'By the end of this lesson you will be able to:',
+        items: [
+          '🔍 Identify the most common reasons robots break or behave unexpectedly',
+          '🧠 Use the 4-Step Debug Method to approach any problem calmly and systematically',
+          '🔧 Fix basic hardware and software issues on a real LEGO robot',
+          '✅ Verify that your fix actually worked — not just assume it did',
+        ],
       },
+
+      // ── RULES ──
       {
         type: 'rules',
         label: '— Class Rules',
         heading: 'Rules',
         items: RULES_STANDARD,
       },
+
+      // ── HOOK ──
+      {
+        type: 'question',
+        label: '— Hook: Why Robots Fail',
+        heading: 'Your Robot Worked Yesterday...',
+        body: 'Imagine this: your robot worked perfectly yesterday. Today you press the button — nothing. What do you check FIRST?',
+        items: [
+          '👆 Think about it for 10 seconds, then share your guess.',
+          '💡 There is no wrong answer — what is your first instinct?',
+          '"Robots fail ALL the time. Even professional engineers spend more time debugging than building."',
+          '"The skill that separates a good roboticist from a great one is how FAST they can find the problem."',
+        ],
+      },
+
+      // ── 4-STEP DEBUG METHOD ──
+      {
+        type: 'visual',
+        label: '— The Debugging Mindset',
+        heading: 'The 4-Step Debug Method',
+        body: 'Do not guess randomly. Do not change multiple things at once. Follow this process every single time — it works on every robot, every program, forever.',
+        cards: [
+          { icon: '👁️', title: '1. Observe', body: 'What EXACTLY is wrong? Not "it does not work" — describe it precisely: "the left wheel spins but the right one does not."' },
+          { icon: '🔀', title: '2. Isolate', body: 'Is it a hardware problem or a software problem? Test each separately. Unplug the code and test the wires. Then test the code with a working motor.' },
+          { icon: '🧪', title: '3. Test', body: 'Change ONE thing at a time and run the robot. If you change two things at once, you will never know which one fixed it.' },
+          { icon: '✅', title: '4. Fix & Verify', body: 'After the fix, run the robot 3 times. If it works all 3 times, the problem is solved. Once is luck — three times is verified.' },
+        ],
+      },
+
+      // ── POWER PROBLEMS ──
+      {
+        type: 'visual',
+        label: '— Common Problems: Power',
+        heading: 'A. Power Issues',
+        body: 'The first thing to check — ALWAYS. Low power causes weird behaviour that looks like code or sensor problems.',
+        cards: [
+          { icon: '🔋', title: 'Dead Battery', body: 'Robot does not turn on, or turns on and immediately turns off. Fix: charge the Hub fully before every session.' },
+          { icon: '📉', title: 'Low Battery', body: 'Motors run slowly, sensors give wrong readings, robot acts "confused." Fix: charge it — even 20% too low causes problems.' },
+          { icon: '🔌', title: 'Loose Connection', body: 'Power cuts in and out — robot starts, stutters, and stops. Fix: firmly re-seat the USB or battery connector.' },
+          { icon: '💡', title: 'Pro Tip', body: 'Always check battery level FIRST. It takes 5 seconds and rules out a huge category of problems instantly.' },
+        ],
+      },
+
+      // ── WIRING PROBLEMS ──
+      {
+        type: 'visual',
+        label: '— Common Problems: Wiring',
+        heading: 'B. Wiring Problems',
+        body: 'The robot is powered on but motors or sensors are not responding at all. This is almost always a wiring issue.',
+        cards: [
+          { icon: '🔌', title: 'Loose Wire', body: 'Motor or sensor cable is not fully clicked in. The connector feels plugged in but is slightly loose. Fix: push until you hear a click.' },
+          { icon: '🔢', title: 'Wrong Port', body: 'Code says motor is on port A, but the wire is plugged into port B. Fix: match every port in the code to where the cable is physically plugged.' },
+          { icon: '🔄', title: 'Reversed Direction', body: 'Motor runs but in the wrong direction. Often looks like a code issue but can be caused by how the motor is physically oriented. Fix: reverse port in code OR flip the motor mount.' },
+          { icon: '🧹', title: 'Dirty Connector', body: 'Bent pins or debris in the port causes intermittent connection. Fix: gently clean the port with a dry cloth. Never use water.' },
+        ],
+      },
+
+      // ── CODE PROBLEMS ──
+      {
+        type: 'visual',
+        label: '— Common Problems: Code',
+        heading: 'C. Code Issues',
+        body: 'The hardware is fine — the problem is in the program. These are usually the trickiest to find.',
+        cards: [
+          { icon: '🔁', title: 'Wrong Logic', body: 'Conditions are backwards: robot turns left when it should turn right. Fix: re-read the IF statement. Check the condition is correct.' },
+          { icon: '⏱️', title: 'Wrong Timing', body: 'Robot stops too early or too late. Fix: adjust the time value or use degree-based movement instead of time-based.' },
+          { icon: '❌', title: 'Missing Command', body: 'A block was accidentally deleted or never connected. The program looks right but skips a step. Fix: walk through every block one by one.' },
+          { icon: '🔢', title: 'Wrong Port Number', body: 'Code references port A, motor is in port C. Robot does nothing. Fix: double-check every single port assignment in the code.' },
+        ],
+      },
+
+      // ── MECHANICAL PROBLEMS ──
+      {
+        type: 'visual',
+        label: '— Common Problems: Mechanical',
+        heading: 'D. Mechanical Problems',
+        body: 'The code is correct, the wires are right, but the robot still moves wrong. The physical build itself is the problem.',
+        cards: [
+          { icon: '🌀', title: 'Wheels Stuck', body: 'Wheels rub against the frame and slow down or stop. Fix: check wheel clearance — there should be a small gap on all sides.' },
+          { icon: '⚙️', title: 'Gears Slipping', body: 'Gears not meshing properly — motor spins but no movement is transferred. Fix: move axle or gear to ensure teeth are fully engaged.' },
+          { icon: '📐', title: 'Misalignment', body: 'Build is slightly crooked — robot veers left or right even with equal motor speeds. Fix: check symmetry. Both sides must be mirror images.' },
+          { icon: '🪛', title: 'Loose Parts', body: 'A beam or axle that was fine during building works loose during motion. Fix: reinforce joins. Add extra connector pieces at stress points.' },
+        ],
+      },
+
+      // ── LIVE DEMO / SCENARIO ──
       {
         type: 'concept',
-        label: '— Recap',
-        heading: 'Sports Robots Review',
-        body: 'Last lesson we built goal-kicking robots. Who can answer:',
+        label: '— Live Demo: Walk Through It',
+        heading: 'Scenario: Robot Will Not Move Forward',
+        body: 'Follow the 4-Step Debug Method together. At each step, I will ask YOU what to check next.',
         items: [
-          '⚡ Why is reacting quickly so important in sports robots? (ball/game moves fast)',
-          '🎯 What does "precision" mean in the context of kicking a ball?',
-          '📹 Name one piece of technology already used in real sports. (VAR, Hawkeye, sensors...)',
-          '🤖 Did your robot hit the goal? What made it miss if it did?',
+          '👁️  OBSERVE — The robot turns on, the program runs, but the wheels do not spin at all.',
+          '🔀  ISOLATE — Is it hardware or software? → Open the code, find the motor block. Port is set to A.',
+          '🧪  TEST — Manually check: is the motor cable plugged into port A? → No! It is in port C.',
+          '✅  FIX — Move the cable to port A and run again. Wheels spin. Test 3 times — confirmed fixed.',
+          '🤔  YOUR TURN: What would you check if the wheels spun but the robot moved backwards?',
         ],
       },
+
+      // ── STUDENT ACTIVITY ──
       {
-        type: 'visual',
-        label: '— Builder\'s Mindset',
-        heading: 'How Great Builders Think About Failure',
-        body: 'Every engineer, inventor, and athlete has one thing in common: they use failure as information, not as a reason to stop.',
-        cards: [
-          { icon: '💡', title: 'Edison and the Lightbulb', body: 'Thomas Edison tried over 1,000 different filaments before finding one that worked. Each failure taught him something new.' },
-          { icon: '✈️', title: 'Wright Brothers', body: 'Wilbur and Orville crashed over 100 times before their first successful 12-second flight at Kitty Hawk.' },
-          { icon: '🚀', title: 'SpaceX', body: 'SpaceX rockets exploded dozens of times before landing successfully. Each explosion revealed what to fix next.' },
-          { icon: '🧬', title: 'Penicillin', body: 'Alexander Fleming discovered penicillin from a mold that contaminated and "ruined" his experiment. A mistake saved millions of lives.' },
+        type: 'question',
+        label: '— Student Activity',
+        heading: 'Scenario: Robot Spins in Circles',
+        body: 'Your robot is supposed to drive straight. Instead it spins in place or curves badly. Work it out:',
+        items: [
+          '🤔 Question 1: What is the most likely cause? (Think: mechanical, code, wiring, or power?)',
+          '🤔 Question 2: How would you TEST your theory without changing anything yet?',
+          '🤔 Question 3: What is ONE change you would make first?',
+          '💡 Answer hint: Spinning in circles → one motor is going the wrong direction. Check if both motors are set to the same direction in code.',
+          '✋ 2-3 students share their answers before we reveal the solution.',
         ],
       },
-      {
-        type: 'visual',
-        label: '— The Improvement Loop',
-        heading: 'How Engineers Fix Things',
-        body: 'Every engineer follows this cycle. You never just build once — you keep going around the loop until it works great!',
-        cards: [
-          { icon: '🔨', title: 'Build', body: 'Put it together — even if it is not perfect yet. A real attempt beats a perfect plan.' },
-          { icon: '🧪', title: 'Test', body: 'Try it out in the real world. Does it do what you wanted? Measure the result.' },
-          { icon: '👀', title: 'Observe', body: 'Watch carefully. What exactly goes wrong? At what point? In what conditions?' },
-          { icon: '💡', title: 'Improve', body: 'Change ONE thing at a time. If you change many things at once, you will not know what fixed it.' },
-          { icon: '🔁', title: 'Repeat', body: 'Go back to Build. Every loop makes it stronger and smarter. The best robots go through this loop hundreds of times.' },
-        ],
-      },
-      {
-        type: 'visual',
-        label: '— Types of Robot Problems',
-        heading: 'Diagnosing What is Wrong',
-        body: 'Before you can fix a broken robot, you need to know WHAT kind of problem it has. There are three main categories:',
-        cards: [
-          { icon: '🔩', title: 'Mechanical', body: 'Physical problems — loose axles, pieces that popped off, gears not meshing, wheels slipping. Fix: rebuild or tighten.' },
-          { icon: '💻', title: 'Code / Logic', body: 'The build is fine but the program has a mistake — wrong port number, wrong direction, timing off. Fix: debug the code.' },
-          { icon: '📡', title: 'Sensor', body: 'The sensor is not reading correctly — wrong port, dirty lens, too close/far, or wrong calibration. Fix: check connections and range.' },
-          { icon: '🔋', title: 'Power', body: 'Low battery causes motors to run slower and sensors to read inaccurately. Fix: charge or replace before testing.' },
-        ],
-      },
+
+      // ── WRAP-UP ──
       {
         type: 'concept',
-        label: '— Debugging',
-        heading: 'The Art of Finding Bugs',
-        body: 'In programming, a "bug" is any mistake that causes unexpected behaviour. Debugging means finding and fixing it systematically.',
+        label: '— Wrap-Up',
+        heading: '"Good Roboticists Fix Problems Fast."',
+        body: 'The best engineers are not the ones who never fail — they are the ones who have a PROCESS for fixing things quickly.',
         items: [
-          '1️⃣  DESCRIBE the problem exactly. Not "it does not work" but "it turns left instead of right on the second move."',
-          '2️⃣  REPRODUCE it. Can you make the problem happen again? If yes, you can study it.',
-          '3️⃣  ISOLATE it. Remove parts of the code until you find the line that causes the problem.',
-          '4️⃣  HYPOTHESIZE. Make a guess: "I think the issue is the motor speed is set to -100 when it should be +100."',
-          '5️⃣  TEST the fix. Change one thing, run it, check result. Did it get better or worse?',
-          '6️⃣  DOCUMENT what you did. Write down what the bug was and what fixed it.',
+          '🔍 Always follow a process — do not guess randomly.',
+          '🧘 Stay calm — panic makes debugging take 5x longer.',
+          '🔬 Change ONE thing at a time — you need to know what worked.',
+          '✅ Verify your fix — run the robot 3 times before declaring victory.',
+          '📝 Remember the 4 categories: Power → Wiring → Code → Mechanical.',
         ],
       },
+
+      // ── PROJECT ──
       {
         type: 'project',
         label: "— Today's Project",
         heading: 'Broken',
-        body: 'Unit Plans → Invention Squad → Broken. You will receive a robot that is intentionally broken. Diagnose the problem and fix it using the Builder\'s Mindset process.',
+        body: 'Unit Plans → Invention Squad → Broken. You will receive a robot that is intentionally broken. Use the 4-Step Debug Method to find and fix what is wrong.',
         projectLink: { label: 'Open in LEGO SPIKE', url: LEGO_SPIKE },
       },
+
+      // ── CHALLENGE 1 ──
       {
         type: 'challenge',
         label: '— Challenge',
-        heading: 'Diagnose the Problem',
-        body: 'After building the broken robot, write down your diagnosis: Is the problem mechanical, code, sensor, or power? What specifically is wrong? What evidence supports your guess? Do not start fixing until you have written your diagnosis.',
+        heading: 'Diagnose Before You Touch',
+        body: 'Before changing ANYTHING on the broken robot, write your full diagnosis: What category is the problem? (Power / Wiring / Code / Mechanical) What is your evidence? What do you predict the fix will be? Only start fixing after you have written this down.',
         challengeNum: 1,
       },
+
+      // ── CHALLENGE 2 ──
       {
         type: 'challenge',
         label: '— Challenge',
-        heading: 'Implement Your Fix',
-        body: 'Now fix it! Change ONE thing at a time and test after each change. Can you improve the robot beyond its original design? Add a feature that was not there before.',
+        heading: 'Fix and Improve',
+        body: 'Fix the broken robot using ONE change at a time. Test after every change. Once it works correctly, add ONE improvement that was not in the original design — a new behaviour, a sensor, or a better movement.',
         challengeNum: 2,
       },
     ],
