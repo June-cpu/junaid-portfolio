@@ -43,7 +43,7 @@ export default function Intro() {
 
   // Scroll section tracking
   useEffect(() => {
-    const sections = ['work', 'about', 'contact'];
+    const sections = ['work', 'services', 'about', 'contact'];
     const observers: IntersectionObserver[] = sections.map(id => {
       const el = document.getElementById(id);
       if (!el) return null as unknown as IntersectionObserver;
@@ -131,7 +131,7 @@ export default function Intro() {
           >
             ×
           </button>
-          {['Work', 'About', 'Contact'].map(link => (
+          {['Work', 'Services', 'About', 'Contact'].map(link => (
             <a
               key={link}
               href={`#${link.toLowerCase()}`}
@@ -200,7 +200,7 @@ export default function Intro() {
                 display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6,
                 animation: 'fadeUp 0.8s ease forwards', opacity: 0, animationDelay: '0.2s'
               }}>
-                {['Work', 'About', 'Contact'].map(link => (
+                {['Work', 'Services', 'About', 'Contact'].map(link => (
                   <a key={link} href={`#${link.toLowerCase()}`}
                     onClick={() => track('click', { element: `nav-${link.toLowerCase()}` })}
                     onMouseEnter={onEnter} onMouseLeave={onLeave}
