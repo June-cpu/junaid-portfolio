@@ -20,10 +20,11 @@ const useBreakpoint = () => {
 };
 
 const WIP = {
-  title: 'NYC Payroll Analysis',
+  title: 'Rated Halal',
   description:
-    'End-to-end analysis of New York City payroll data — cleaning, SQL warehousing, exploratory analysis, and interactive dashboards. Building toward a full analyst portfolio case study.',
-  tags: ['Python', 'SQL', 'Pandas', 'Matplotlib', 'PostgreSQL'],
+    'A halal restaurant discovery platform built for the Muslim community in NYC. Find, rate, and verify halal restaurants — with community halal verification, QR check-ins, masjid prayer times, gamified reviewing, and a full business portal with tiered analytics and Stripe-powered subscriptions.',
+  tags: ['Next.js', 'TypeScript', 'Supabase', 'PostgreSQL', 'Stripe', 'Tailwind CSS'],
+  link: 'https://ratedhalal.com',
 };
 
 const PROJECTS = [
@@ -59,6 +60,14 @@ const PROJECTS = [
       'C++ implementation of a simulated file system with File and Folder classes, demonstrating move semantics, deep copy, and tree-based directory traversal.',
     tags: ['C++', 'Move Semantics', 'OOP', 'Data Structures'],
     github: 'https://github.com/June-cpu/Simulated-File-System',
+  },
+  {
+    num: '05',
+    title: 'NYC Payroll Analysis',
+    description:
+      'End-to-end analysis of 500K+ NYC payroll records across 88 agencies and 7 fiscal years. Cleaned and normalized salary data, ran overtime deep-dives, and surfaced findings like 454% payroll growth from FY2019–2025 and top 3 agencies driving 83% of total spend.',
+    tags: ['Python', 'Pandas', 'Matplotlib', 'Seaborn', 'Jupyter'],
+    github: 'https://github.com/June-cpu/nyc-payroll-analysis',
   },
 ];
 
@@ -151,9 +160,18 @@ export default function Work() {
                   fontFamily: 'Cormorant Garamond, serif', fontSize: '4rem', fontWeight: 300,
                   color: 'var(--cream-dark)', lineHeight: 1, userSelect: 'none',
                 }}>WIP</span>
-                <span style={{ fontSize: '0.55rem', letterSpacing: '0.12em', color: 'var(--ink-faint)', textTransform: 'uppercase' }}>
-                  GitHub soon
-                </span>
+                <a
+                  href={WIP.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    fontSize: '0.55rem', letterSpacing: '0.12em', color: 'var(--accent)',
+                    textTransform: 'uppercase', textDecoration: 'none',
+                    borderBottom: '1px solid var(--accent)', paddingBottom: 1,
+                  }}
+                >
+                  ratedhalal.com ↗
+                </a>
               </div>
             )}
           </div>
