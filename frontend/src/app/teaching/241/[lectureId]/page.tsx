@@ -174,20 +174,22 @@ function RulesSlide({ slide }: { slide: Slide }) {
 }
 
 function ConceptSlide({ slide }: { slide: Slide }) {
+  const manyItems = (slide.items?.length ?? 0) > 4;
   return (
     <div style={{
       width: '100%', height: '100%',
       background: 'var(--cream)',
       display: 'flex', flexDirection: 'column',
-      justifyContent: 'center',
-      padding: 'clamp(40px, 6vw, 96px)',
+      justifyContent: manyItems ? 'flex-start' : 'center',
+      padding: manyItems ? 'clamp(28px, 4vw, 64px) clamp(40px, 6vw, 96px)' : 'clamp(40px, 6vw, 96px)',
       overflow: 'auto',
     }}>
       {slide.label && (
         <div style={{
           fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase',
-          color: 'var(--accent)', marginBottom: 24,
+          color: 'var(--accent)', marginBottom: 20,
           display: 'flex', alignItems: 'center', gap: 12,
+          flexShrink: 0,
         }}>
           <span style={{ display: 'block', width: 28, height: 1, background: 'var(--accent)' }} />
           {slide.label}
@@ -196,32 +198,35 @@ function ConceptSlide({ slide }: { slide: Slide }) {
 
       <h2 style={{
         fontFamily: 'Cormorant Garamond, serif', fontWeight: 300,
-        fontSize: 'clamp(2rem, 4.5vw, 4.2rem)',
+        fontSize: manyItems ? 'clamp(1.6rem, 3vw, 2.8rem)' : 'clamp(2rem, 4.5vw, 4.2rem)',
         lineHeight: 1.05, letterSpacing: '-0.02em',
-        color: 'var(--ink)', marginBottom: 32,
-        maxWidth: '16ch',
+        color: 'var(--ink)', marginBottom: manyItems ? 16 : 32,
+        maxWidth: manyItems ? '100%' : '16ch',
+        flexShrink: 0,
       }}>
         {slide.heading}
       </h2>
 
       {slide.body && (
         <p style={{
-          fontSize: '0.78rem', lineHeight: 1.9, color: 'var(--ink-light)',
-          maxWidth: 640, fontWeight: 300, marginBottom: slide.items ? 36 : 0,
+          fontSize: '0.75rem', lineHeight: 1.8, color: 'var(--ink-light)',
+          maxWidth: 680, fontWeight: 300, marginBottom: slide.items ? 24 : 0,
+          flexShrink: 0,
         }}>
           {slide.body}
         </p>
       )}
 
       {slide.items && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 680 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: manyItems ? 10 : 16, maxWidth: 760 }}>
           {slide.items.map((item, i) => (
             <div key={i} style={{
-              display: 'flex', alignItems: 'flex-start', gap: 20,
-              padding: '14px 20px',
+              display: 'flex', alignItems: 'flex-start', gap: 16,
+              padding: manyItems ? '10px 16px' : '14px 20px',
               borderLeft: '2px solid var(--ink-faint)',
+              background: manyItems ? 'rgba(0,0,0,0.015)' : 'transparent',
             }}>
-              <p style={{ fontSize: '0.72rem', lineHeight: 1.7, color: 'var(--ink-light)', fontWeight: 300 }}>
+              <p style={{ fontSize: manyItems ? '0.68rem' : '0.72rem', lineHeight: 1.65, color: 'var(--ink-light)', fontWeight: 300 }}>
                 {item}
               </p>
             </div>
@@ -544,9 +549,11 @@ function VisualSlide({ slide }: { slide: Slide }) {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${Math.min(cards.length, 4)}, 1fr)`,
-        gap: 16,
-        maxWidth: 900,
+        gridTemplateColumns: cards.length <= 4
+          ? `repeat(${cards.length}, 1fr)`
+          : 'repeat(auto-fill, minmax(200px, 1fr))',
+        gap: 14,
+        maxWidth: cards.length <= 4 ? 900 : 1100,
       }}>
         {cards.map((card: VisualCard, i: number) => (
           <div key={i} style={{
