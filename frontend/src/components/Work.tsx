@@ -24,7 +24,7 @@ const WIP = {
   description:
     'A halal restaurant discovery platform built for the Muslim community in NYC. Find, rate, and verify halal restaurants — with community halal verification, QR check-ins, masjid prayer times, gamified reviewing, and a full business portal with tiered analytics and Stripe-powered subscriptions.',
   tags: ['Next.js', 'TypeScript', 'Supabase', 'PostgreSQL', 'Stripe', 'Tailwind CSS'],
-  link: 'https://ratedhalal.com',
+  link: 'https://rated-halal.vercel.app/get-started',
 };
 
 const PROJECTS = [
@@ -170,7 +170,7 @@ export default function Work() {
                     borderBottom: '1px solid var(--accent)', paddingBottom: 1,
                   }}
                 >
-                  ratedhalal.com ↗
+                  rated-halal.vercel.app ↗
                 </a>
               </div>
             )}
