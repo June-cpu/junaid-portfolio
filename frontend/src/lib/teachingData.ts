@@ -1278,28 +1278,6 @@ export const LECTURES: Lecture[] = [
         ],
       },
       {
-        type: 'video',
-        label: '— Line Followers in Action',
-        heading: 'Watch Real Line-Following Robots',
-        body: 'See how a simple color-sensor loop looks in real life — from classroom robots to professional competition bots.',
-        videos: [
-          { label: 'LEGO SPIKE Line Follower Demo', url: 'https://www.youtube.com/watch?v=uqcG2GqkT5Q' },
-          { label: 'Fast Line Follower Competition Robot', url: 'https://www.youtube.com/watch?v=OJNHCKTbg-8' },
-        ],
-      },
-      {
-        type: 'concept',
-        label: '— After the Videos',
-        heading: 'What Did You Notice?',
-        body: 'After watching the robots, think critically about what you saw:',
-        items: [
-          '👁️ How did the robot respond when it drifted off the line? Did it snap back or glide back?',
-          '⚡ What was different about the fast competition robot compared to the slow classroom one?',
-          '🤔 The fast robot barely seemed to wiggle — what do you think that means about its threshold and correction size?',
-          '🏁 If you were entering a line-following race, what is the ONE thing you would focus on to go faster?',
-        ],
-      },
-      {
         type: 'examples',
         label: '— Real World',
         heading: 'Line-Following Robots in Industry',
