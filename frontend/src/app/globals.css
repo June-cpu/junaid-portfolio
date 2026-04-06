@@ -34,18 +34,11 @@ body {
   background: var(--cream);
   color: var(--ink);
   font-family: 'DM Mono', monospace;
-  cursor: none;
 }
 
 @media (min-width: 768px) {
   body {
     overflow-x: hidden;
-  }
-}
-
-@media (max-width: 767px) {
-  body {
-    cursor: auto;
   }
 }
 

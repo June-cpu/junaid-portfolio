@@ -57,6 +57,14 @@ export default function Intro() {
     return () => observers.forEach(o => o?.disconnect());
   }, []);
 
+  // Hide the real cursor on desktop while the home page is mounted,
+  // restore it when navigating away
+  useEffect(() => {
+    if (isMobile) return;
+    document.body.style.cursor = 'none';
+    return () => { document.body.style.cursor = ''; };
+  }, [isMobile]);
+
   useEffect(() => {
     if (isMobile) return;
 
