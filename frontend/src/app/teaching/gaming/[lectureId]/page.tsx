@@ -715,8 +715,29 @@ export default function GamingSessionPage() {
           </div>
         </div>
 
-        {/* Right: prev/next */}
-        <div style={{ display: 'flex', gap: 4 }}>
+        {/* Right: code / output links + prev/next */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link href={`/teaching/gaming/${session.id}/code`} style={{
+            fontSize: '0.52rem', letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: navColor, textDecoration: 'none', whiteSpace: 'nowrap',
+            padding: '5px 10px',
+            border: `1px solid ${navBorder}`,
+            borderRadius: 2,
+            transition: 'color 0.2s, border-color 0.2s',
+          }}>
+            {'</>'}
+          </Link>
+          <Link href={`/teaching/gaming/${session.id}/output`} style={{
+            fontSize: '0.52rem', letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: navColor, textDecoration: 'none', whiteSpace: 'nowrap',
+            padding: '5px 10px',
+            border: `1px solid ${navBorder}`,
+            borderRadius: 2,
+            transition: 'color 0.2s, border-color 0.2s',
+          }}>
+            ▶
+          </Link>
+          <span style={{ width: 1, height: 16, background: navBorder }} />
           <button
             onClick={() => go(-1)}
             disabled={isFirst}
