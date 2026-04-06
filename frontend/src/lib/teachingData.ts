@@ -1374,6 +1374,32 @@ export const LECTURES: Lecture[] = [
       },
       {
         type: 'visual',
+        label: '— How Computers See Color',
+        heading: 'From One Number to Three',
+        body: 'Your color sensor returns ONE number — brightness from 0 to 100. But your computer screen uses THREE numbers to make every color you can see. Same idea, way more range.',
+        cards: [
+          { icon: '🔴', title: 'Red Channel (0 – 255)', body: '0 means no red at all. 255 means full red. Every shade of red, pink, and orange starts here. In code: rgb(255, 0, 0) = pure red.' },
+          { icon: '🟢', title: 'Green Channel (0 – 255)', body: '0 means no green. 255 means full green. rgb(0, 255, 0) = neon green. Combined with red: rgb(255, 255, 0) = yellow.' },
+          { icon: '🔵', title: 'Blue Channel (0 – 255)', body: '0 means no blue. 255 means full blue. rgb(0, 0, 255) = pure blue. All three at 255: rgb(255, 255, 255) = white. All at 0 = black.' },
+          { icon: '🎨', title: 'Hex Codes — #RRGGBB', body: 'Programmers write RGB as a hex code. #FF0000 = red, #00FF00 = green, #C4572A = the exact orange on this slide. Each pair of letters is one channel, 00–FF (0–255 in base 16).' },
+        ],
+      },
+      {
+        type: 'concept',
+        label: '— Color in Code',
+        heading: 'Why 0 to 255? And What Is Hex?',
+        body: 'Every color channel uses 8 bits of memory — and 8 bits can hold exactly 256 different values (0 through 255). Three channels = 256 × 256 × 256 = over 16 million possible colors.',
+        items: [
+          '🔢 Decimal (what you know): 0, 1, 2 … 9, 10, 11 … 255',
+          '🔣 Hexadecimal (base 16): 0–9 then A=10, B=11, C=12, D=13, E=14, F=15',
+          '🔣 So FF in hex = 15×16 + 15 = 255 in decimal — the maximum value',
+          '🎨 #C4572A breaks down as: Red = C4 (196), Green = 57 (87), Blue = 2A (42)',
+          '💡 Your color sensor read brightness as 0–100. The screen uses 0–255 per channel for the same reason — they\'re both just numbers telling hardware how strong to be',
+          '🖥️ LEGO SPIKE\'s color sensor can also return RGB values — try sensor.get_color() in advanced mode',
+        ],
+      },
+      {
+        type: 'visual',
         label: '— Engineering Design Process',
         heading: 'How Engineers Solve Problems',
         body: 'Engineers do not just build randomly — they follow a structured process. This 6-step cycle is used everywhere from NASA to LEGO.',
