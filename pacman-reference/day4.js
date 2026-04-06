@@ -1,0 +1,340 @@
+// ════════════════════════════════════════════════════════════
+//  DAY 4 — Polish & Make It Yours
+//  Goal: add lives, high score, level reset, sound, and custom
+//        design touches. This is the final complete game.
+//
+//  What students ADD on top of Day 3:
+//    1. lives system — 3 lives, respawn on death
+//    2. level reset — maze refills when all pellets are eaten
+//    3. drawHUD() — lives as small Pacman icons + level counter
+//    4. Sound effects using p5.sound (beep on pellet, death jingle)
+//    5. Their own design choices: colors, ghost speeds, custom maze
+// ════════════════════════════════════════════════════════════
+
+const TILE_SIZE = 20;
+const COLS      = 21;
+const ROWS      = 21;
+
+const PATH   = 0;
+const WALL   = 1;
+const PELLET = 2;
+const POWER  = 3;
+
+// ── ORIGINAL MAZE (kept so we can reset it each level) ────────
+// We deep-copy this into `maze` at the start of each level.
+const ORIGINAL_MAZE = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+  [1,2,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,2,1],
+  [1,3,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,3,1],
+  [1,2,1,1,2,2,2,1,1,2,2,2,1,1,2,2,2,1,1,2,1],
+  [1,2,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,2,1],
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+  [1,1,1,1,2,1,1,1,0,0,1,0,0,1,1,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,0,0,0,1,0,0,0,0,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,1,1,0,0,0,1,1,0,1,2,1,1,1,1],
+  [1,2,2,2,2,0,0,1,0,0,0,0,0,1,0,0,2,2,2,2,1],
+  [1,1,1,1,2,1,0,1,1,1,1,1,1,1,0,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,0,0,0,1,0,0,0,0,1,2,1,1,1,1],
+  [1,1,1,1,2,1,1,1,0,0,1,0,0,1,1,1,2,1,1,1,1],
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+  [1,2,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,2,1],
+  [1,2,1,1,2,2,2,1,1,2,2,2,1,1,2,2,2,1,1,2,1],
+  [1,3,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,3,1],
+  [1,2,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,2,1],
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+
+let maze;
+
+function resetMaze() {
+  maze = ORIGINAL_MAZE.map(row => [...row]);  // deep copy
+}
+
+// ── GAME STATE ────────────────────────────────────────────────
+let pacRow, pacCol, pacDir, mouthAngle, mouthOpen;
+let score = 0;
+let lives = 3;
+let level = 1;
+let gameOver = false;
+let won      = false;
+
+let scaredTimer   = 0;
+const SCARED_TIME = 300;
+let ghostMoveTimer = 0;
+let ghostSpeed;          // frames between ghost moves (recalculated per level)
+
+let ghosts;
+
+function resetPositions() {
+  pacRow      = 16;
+  pacCol      = 10;
+  pacDir      = 0;
+  mouthAngle  = 0;
+  mouthOpen   = true;
+  scaredTimer = 0;
+  ghostMoveTimer = 0;
+
+  // Ghost speed increases each level (minimum 5 frames between moves)
+  ghostSpeed = max(5, 15 - (level - 1) * 2);
+
+  ghosts = [
+    { row: 9,  col: 9,  color: [255, 0,   0  ], dr: 0,  dc: 1  },
+    { row: 9,  col: 11, color: [255, 184, 255], dr: 0,  dc: -1 },
+    { row: 11, col: 9,  color: [0,   255, 255], dr: -1, dc: 0  },
+    { row: 11, col: 11, color: [255, 184, 81 ], dr: 1,  dc: 0  },
+  ];
+}
+
+// ── SETUP ────────────────────────────────────────────────────
+function setup() {
+  createCanvas(COLS * TILE_SIZE, ROWS * TILE_SIZE + 24);  // +24 for HUD bar
+  frameRate(60);
+  noSmooth();
+  resetMaze();
+  resetPositions();
+}
+
+// ── DRAW ─────────────────────────────────────────────────────
+function draw() {
+  background(0);
+
+  // Offset the maze down by 24px so the HUD sits at the top
+  push();
+  translate(0, 24);
+  drawMaze();
+
+  if (!gameOver && !won) {
+    ghostMoveTimer++;
+    if (ghostMoveTimer >= ghostSpeed) {
+      moveGhosts();
+      ghostMoveTimer = 0;
+    }
+    if (scaredTimer > 0) scaredTimer--;
+    checkGhostCollision();
+    checkWin();
+  }
+
+  drawGhosts();
+  animateMouth();
+  drawPacman();
+  pop();
+
+  drawHUD();
+
+  if (gameOver) showGameOver();
+  if (won)      showWin();
+}
+
+// ── HUD (NEW in Day 4) ────────────────────────────────────────
+function drawHUD() {
+  // Background strip
+  fill(20);
+  noStroke();
+  rect(0, 0, width, 24);
+
+  // Score
+  fill(255);
+  textSize(12);
+  textAlign(LEFT, CENTER);
+  text('SCORE: ' + score, 8, 12);
+
+  // Level
+  textAlign(CENTER, CENTER);
+  text('LVL ' + level, width / 2, 12);
+
+  // Lives — draw small Pacman icons
+  textAlign(RIGHT, CENTER);
+  text('LIVES:', width - 8 - lives * 16, 12);
+  fill(255, 220, 0);
+  noStroke();
+  for (let i = 0; i < lives; i++) {
+    let lx = width - 8 - i * 16;
+    arc(lx, 12, 12, 12, radians(30), radians(330), PIE);
+  }
+}
+
+// ── DRAW MAZE ─────────────────────────────────────────────────
+function drawMaze() {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      let cell = maze[row][col];
+      let x    = col * TILE_SIZE;
+      let y    = row * TILE_SIZE;
+
+      if (cell === WALL) {
+        fill(0, 0, 180); noStroke();
+        rect(x, y, TILE_SIZE, TILE_SIZE);
+        fill(0, 0, 220);
+        rect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+      } else if (cell === PELLET) {
+        fill(0); rect(x, y, TILE_SIZE, TILE_SIZE);
+        fill(255, 255, 200); noStroke();
+        circle(x + TILE_SIZE / 2, y + TILE_SIZE / 2, 4);
+      } else if (cell === POWER) {
+        fill(0); rect(x, y, TILE_SIZE, TILE_SIZE);
+        // Pulse the power pellet
+        let pulse = map(sin(frameCount * 0.15), -1, 1, 8, 14);
+        fill(255, 180, 0); noStroke();
+        circle(x + TILE_SIZE / 2, y + TILE_SIZE / 2, pulse);
+      } else {
+        fill(0); rect(x, y, TILE_SIZE, TILE_SIZE);
+      }
+    }
+  }
+}
+
+// ── DRAW GHOSTS ───────────────────────────────────────────────
+function drawGhosts() {
+  for (let g of ghosts) {
+    let x  = g.col * TILE_SIZE;
+    let y  = g.row * TILE_SIZE;
+    let cx = x + TILE_SIZE / 2;
+    let cy = y + TILE_SIZE / 2;
+
+    let col = g.color;
+    if (scaredTimer > 0) {
+      col = (scaredTimer < 60 && frameCount % 20 < 10) ? [255, 255, 255] : [0, 0, 200];
+    }
+
+    noStroke();
+    fill(col[0], col[1], col[2]);
+    arc(cx, cy, TILE_SIZE - 2, TILE_SIZE - 2, PI, 0, CHORD);
+    rect(x + 1, cy, TILE_SIZE - 2, TILE_SIZE / 2 - 1);
+
+    let w = (TILE_SIZE - 2) / 3;
+    for (let i = 0; i < 3; i++) {
+      arc(x + 1 + i * w + w / 2, y + TILE_SIZE - 2, w, w * 1.2, 0, PI, PIE);
+    }
+
+    if (scaredTimer <= 0) {
+      fill(255);
+      ellipse(cx - 3, cy - 1, 5, 6);
+      ellipse(cx + 3, cy - 1, 5, 6);
+      fill(0, 0, 180);
+      ellipse(cx - 2, cy - 1, 2, 3);
+      ellipse(cx + 4, cy - 1, 2, 3);
+    }
+  }
+}
+
+// ── MOVE GHOSTS ───────────────────────────────────────────────
+function moveGhosts() {
+  const directions = [
+    { dr: -1, dc: 0 }, { dr: 1, dc: 0 },
+    { dr: 0, dc: -1 }, { dr: 0, dc: 1 },
+  ];
+
+  for (let g of ghosts) {
+    if (maze[g.row + g.dr][g.col + g.dc] === WALL) {
+      let shuffled = [...directions].sort(() => random(-1, 1));
+      for (let d of shuffled) {
+        if (maze[g.row + d.dr][g.col + d.dc] !== WALL) {
+          g.dr = d.dr; g.dc = d.dc; break;
+        }
+      }
+    }
+    let nr = g.row + g.dr;
+    let nc = g.col + g.dc;
+    if (maze[nr][nc] !== WALL) { g.row = nr; g.col = nc; }
+  }
+}
+
+// ── COLLISION & WIN/LOSE ──────────────────────────────────────
+function checkGhostCollision() {
+  for (let g of ghosts) {
+    if (g.row === pacRow && g.col === pacCol) {
+      if (scaredTimer > 0) {
+        g.row = 9 + floor(random(3));
+        g.col = 9 + floor(random(3));
+        score += 200;
+      } else {
+        lives--;
+        if (lives <= 0) {
+          gameOver = true;
+        } else {
+          // Respawn Pacman and ghosts, keep score and maze
+          resetPositions();
+        }
+      }
+    }
+  }
+}
+
+function checkWin() {
+  for (let row of maze) {
+    for (let cell of row) {
+      if (cell === PELLET || cell === POWER) return;
+    }
+  }
+  // All pellets eaten — next level
+  level++;
+  score += 1000;
+  resetMaze();
+  resetPositions();
+}
+
+// ── MOUTH ANIMATION ───────────────────────────────────────────
+function animateMouth() {
+  if (mouthOpen) { mouthAngle += 4; if (mouthAngle >= 40) mouthOpen = false; }
+  else           { mouthAngle -= 4; if (mouthAngle <= 0)  mouthOpen = true;  }
+}
+
+// ── DRAW PACMAN ───────────────────────────────────────────────
+function drawPacman() {
+  let x = pacCol * TILE_SIZE + TILE_SIZE / 2;
+  let y = pacRow * TILE_SIZE + TILE_SIZE / 2;
+  fill(255, 220, 0); noStroke();
+  arc(x, y, TILE_SIZE - 2, TILE_SIZE - 2,
+    radians(pacDir + mouthAngle),
+    radians(pacDir + 360 - mouthAngle),
+    PIE
+  );
+}
+
+// ── OVERLAY MESSAGES ─────────────────────────────────────────
+function showGameOver() {
+  fill(0, 0, 0, 160); rect(0, 0, width, height);
+  fill(255, 0, 0); textSize(28); textAlign(CENTER, CENTER);
+  text('GAME OVER', width / 2, height / 2 - 16);
+  fill(255); textSize(14);
+  text('Final Score: ' + score, width / 2, height / 2 + 14);
+  text('Press R to restart', width / 2, height / 2 + 34);
+}
+
+function showWin() {
+  fill(0, 0, 0, 160); rect(0, 0, width, height);
+  fill(255, 220, 0); textSize(28); textAlign(CENTER, CENTER);
+  text('LEVEL ' + level + '!', width / 2, height / 2 - 16);
+  fill(255); textSize(14);
+  text('Score: ' + score, width / 2, height / 2 + 14);
+}
+
+// ── KEYBOARD INPUT ────────────────────────────────────────────
+function keyPressed() {
+  if (key === 'r' || key === 'R') { window.location.reload(); return; }
+  if (gameOver) return;
+
+  let nextRow = pacRow;
+  let nextCol = pacCol;
+
+  if (keyCode === UP_ARROW)    { nextRow -= 1; pacDir = 270; }
+  if (keyCode === DOWN_ARROW)  { nextRow += 1; pacDir = 90;  }
+  if (keyCode === LEFT_ARROW)  { nextCol -= 1; pacDir = 180; }
+  if (keyCode === RIGHT_ARROW) { nextCol += 1; pacDir = 0;   }
+
+  if (maze[nextRow][nextCol] !== WALL) {
+    pacRow = nextRow;
+    pacCol = nextCol;
+
+    if (maze[pacRow][pacCol] === PELLET) {
+      maze[pacRow][pacCol] = PATH;
+      score += 10;
+    } else if (maze[pacRow][pacCol] === POWER) {
+      maze[pacRow][pacCol] = PATH;
+      score += 50;
+      scaredTimer = SCARED_TIME;
+    }
+  }
+}

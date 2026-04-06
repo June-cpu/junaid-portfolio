@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Day 3 — Pacman Reference</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; padding: 20px; font-family: 'Courier New', monospace; color: #fff; }
+    h2 { color: #FFD700; font-size: 0.9rem; letter-spacing: 0.15em; margin-bottom: 4px; text-transform: uppercase; }
+    p  { color: #555; font-size: 0.7rem; margin-bottom: 16px; }
+    canvas { display: block; border: 2px solid #333; }
+    nav { margin-top: 14px; display: flex; gap: 8px; }
+    nav a { color: #555; font-size: 0.7rem; text-decoration: none; padding: 4px 10px; border: 1px solid #333; border-radius: 3px; }
+    nav a:hover { color: #FFD700; border-color: #FFD700; }
+    nav a.active { color: #FFD700; border-color: #FFD700; }
+  </style>
+</head>
+<body>
+  <h2>📋 Instructor Reference — Day 3</h2>
+  <p>This is exactly what students produce by end of Day 3.</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script>
+// ════════════════════════════════════════════════════════════
+//  DAY 3 — Ghosts
+//  Goal: add 4 ghosts that move on their own and can catch Pacman
+//
+//  What students ADD on top of Day 2:
+//    1. ghosts array — each ghost has row, col, color, direction
+//    2. drawGhosts() — draws each ghost as a colored shape
+//    3. moveGhosts() — called from draw(), moves ghosts every N frames
+//    4. checkGhostCollision() — game over if ghost touches Pacman
+//    5. scared state — ghosts turn blue after Pacman eats a power pellet
+//    6. gameOver flag — stops the game and shows a message
+// ════════════════════════════════════════════════════════════
+
+const TILE_SIZE = 20;
+const COLS      = 21;
+const ROWS      = 21;
+
+const PATH   = 0;
+const WALL   = 1;
+const PELLET = 2;
+const POWER  = 3;
+
+let maze = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+  [1,2,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,2,1],
+  [1,3,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,3,1],
+  [1,2,1,1,2,2,2,1,1,2,2,2,1,1,2,2,2,1,1,2,1],
+  [1,2,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,2,1],
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+  [1,1,1,1,2,1,1,1,0,0,1,0,0,1,1,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,0,0,0,1,0,0,0,0,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,1,1,0,0,0,1,1,0,1,2,1,1,1,1],
+  [1,2,2,2,2,0,0,1,0,0,0,0,0,1,0,0,2,2,2,2,1],
+  [1,1,1,1,2,1,0,1,1,1,1,1,1,1,0,1,2,1,1,1,1],
+  [1,1,1,1,2,1,0,0,0,0,1,0,0,0,0,1,2,1,1,1,1],
+  [1,1,1,1,2,1,1,1,0,0,1,0,0,1,1,1,2,1,1,1,1],
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+  [1,2,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,2,1],
+  [1,2,1,1,2,2,2,1,1,2,2,2,1,1,2,2,2,1,1,2,1],
+  [1,3,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,3,1],
+  [1,2,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,2,1],
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+
+// ── PACMAN STATE ──────────────────────────────────────────────
+let pacRow = 16;
+let pacCol = 10;
+let pacDir = 0;
+let mouthAngle = 0;
+let mouthOpen  = true;
+let score = 0;
+
+// ── GHOSTS (NEW in Day 3) ─────────────────────────────────────
+// Each ghost: { row, col, color, dr, dc }
+// dr/dc = current movement direction (+1 or -1 for row or col)
+let ghosts = [
+  { row: 9,  col: 9,  color: [255, 0,   0  ], dr: 0,  dc: 1  },  // Blinky (red)
+  { row: 9,  col: 11, color: [255, 184, 255], dr: 0,  dc: -1 },  // Pinky  (pink)
+  { row: 11, col: 9,  color: [0,   255, 255], dr: -1, dc: 0  },  // Inky   (cyan)
+  { row: 11, col: 11, color: [255, 184, 81 ], dr: 1,  dc: 0  },  // Clyde  (orange)
+];
+
+let scaredTimer   = 0;     // counts down when ghosts are scared (blue)
+const SCARED_TIME = 300;   // 5 seconds at 60fps
+let ghostMoveTimer = 0;    // ghosts move every N frames (not every frame)
+const GHOST_SPEED  = 15;   // lower = faster ghosts
+
+let gameOver = false;
+let won      = false;
+
+// ── SETUP ────────────────────────────────────────────────────
+function setup() {
+  createCanvas(COLS * TILE_SIZE, ROWS * TILE_SIZE);
+  frameRate(60);
+  noSmooth();
+}
+
+// ── DRAW ─────────────────────────────────────────────────────
+function draw() {
+  background(0);
+  drawMaze();
+
+  if (!gameOver && !won) {
+    ghostMoveTimer++;
+    if (ghostMoveTimer >= GHOST_SPEED) {
+      moveGhosts();
+      ghostMoveTimer = 0;
+    }
+    if (scaredTimer > 0) scaredTimer--;
+    checkGhostCollision();
+    checkWin();
+  }
+
+  drawGhosts();
+  animateMouth();
+  drawPacman();
+  drawScore();
+
+  if (gameOver) showGameOver();
+  if (won)      showWin();
+}
+
+// ── DRAW MAZE ─────────────────────────────────────────────────
+function drawMaze() {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      let cell = maze[row][col];
+      let x    = col * TILE_SIZE;
+      let y    = row * TILE_SIZE;
+
+      if (cell === WALL) {
+        fill(0, 0, 180); noStroke();
+        rect(x, y, TILE_SIZE, TILE_SIZE);
+      } else if (cell === PELLET) {
+        fill(0); rect(x, y, TILE_SIZE, TILE_SIZE);
+        fill(255, 255, 200); noStroke();
+        circle(x + TILE_SIZE / 2, y + TILE_SIZE / 2, 4);
+      } else if (cell === POWER) {
+        fill(0); rect(x, y, TILE_SIZE, TILE_SIZE);
+        fill(255, 180, 0); noStroke();
+        circle(x + TILE_SIZE / 2, y + TILE_SIZE / 2, 12);
+      } else {
+        fill(0); rect(x, y, TILE_SIZE, TILE_SIZE);
+      }
+    }
+  }
+}
+
+// ── DRAW GHOSTS (NEW in Day 3) ────────────────────────────────
+function drawGhosts() {
+  for (let g of ghosts) {
+    let x = g.col * TILE_SIZE;
+    let y = g.row * TILE_SIZE;
+    let cx = x + TILE_SIZE / 2;
+    let cy = y + TILE_SIZE / 2;
+
+    // If scared (blue), override color and flash near the end
+    let col = g.color;
+    if (scaredTimer > 0) {
+      col = (scaredTimer < 60 && frameCount % 20 < 10) ? [255, 255, 255] : [0, 0, 200];
+    }
+
+    noStroke();
+    fill(col[0], col[1], col[2]);
+
+    // Body: half circle on top + rectangle on bottom
+    arc(cx, cy, TILE_SIZE - 2, TILE_SIZE - 2, PI, 0, CHORD);
+    rect(x + 1, cy, TILE_SIZE - 2, TILE_SIZE / 2 - 1);
+
+    // Wavy skirt at the bottom
+    fill(col[0], col[1], col[2]);
+    let w = (TILE_SIZE - 2) / 3;
+    for (let i = 0; i < 3; i++) {
+      arc(x + 1 + i * w + w / 2, y + TILE_SIZE - 2, w, w * 1.2, 0, PI, PIE);
+    }
+
+    // Eyes (always white/dark, not affected by scared state)
+    if (scaredTimer <= 0) {
+      fill(255);
+      ellipse(cx - 3, cy - 1, 5, 6);
+      ellipse(cx + 3, cy - 1, 5, 6);
+      fill(0, 0, 180);
+      ellipse(cx - 2, cy - 1, 2, 3);
+      ellipse(cx + 4, cy - 1, 2, 3);
+    }
+  }
+}
+
+// ── MOVE GHOSTS (NEW in Day 3) ────────────────────────────────
+// Simple AI: keep going in the current direction.
+// If blocked, pick a random new direction.
+function moveGhosts() {
+  const directions = [
+    { dr: -1, dc:  0 },  // up
+    { dr:  1, dc:  0 },  // down
+    { dr:  0, dc: -1 },  // left
+    { dr:  0, dc:  1 },  // right
+  ];
+
+  for (let g of ghosts) {
+    let nextRow = g.row + g.dr;
+    let nextCol = g.col + g.dc;
+
+    // If the next tile in the current direction is a wall, pick a new direction
+    if (maze[nextRow][nextCol] === WALL) {
+      // Shuffle directions and pick the first one that isn't a wall
+      let shuffled = [...directions].sort(() => random(-1, 1));
+      for (let d of shuffled) {
+        if (maze[g.row + d.dr][g.col + d.dc] !== WALL) {
+          g.dr = d.dr;
+          g.dc = d.dc;
+          break;
+        }
+      }
+    }
+
+    // Move
+    let nr = g.row + g.dr;
+    let nc = g.col + g.dc;
+    if (maze[nr][nc] !== WALL) {
+      g.row = nr;
+      g.col = nc;
+    }
+  }
+}
+
+// ── CHECK GHOST COLLISION (NEW in Day 3) ──────────────────────
+function checkGhostCollision() {
+  for (let g of ghosts) {
+    if (g.row === pacRow && g.col === pacCol) {
+      if (scaredTimer > 0) {
+        // Eat the ghost — send it back to the ghost house
+        g.row = 9 + floor(random(3));
+        g.col = 9 + floor(random(3));
+        score += 200;
+      } else {
+        gameOver = true;
+      }
+    }
+  }
+}
+
+// ── CHECK WIN ─────────────────────────────────────────────────
+function checkWin() {
+  // Win when no PELLET or POWER cells remain in the maze
+  for (let row of maze) {
+    for (let cell of row) {
+      if (cell === PELLET || cell === POWER) return;  // still dots left
+    }
+  }
+  won = true;
+}
+
+// ── MOUTH ANIMATION ───────────────────────────────────────────
+function animateMouth() {
+  if (mouthOpen) {
+    mouthAngle += 4;
+    if (mouthAngle >= 40) mouthOpen = false;
+  } else {
+    mouthAngle -= 4;
+    if (mouthAngle <= 0)  mouthOpen = true;
+  }
+}
+
+// ── DRAW PACMAN ───────────────────────────────────────────────
+function drawPacman() {
+  let x = pacCol * TILE_SIZE + TILE_SIZE / 2;
+  let y = pacRow * TILE_SIZE + TILE_SIZE / 2;
+  fill(255, 220, 0);
+  noStroke();
+  arc(x, y, TILE_SIZE - 2, TILE_SIZE - 2,
+    radians(pacDir + mouthAngle),
+    radians(pacDir + 360 - mouthAngle),
+    PIE
+  );
+}
+
+// ── DRAW SCORE & MESSAGES ─────────────────────────────────────
+function drawScore() {
+  fill(255); noStroke();
+  textSize(12);
+  textAlign(LEFT, TOP);
+  text('SCORE: ' + score, 6, 4);
+}
+
+function showGameOver() {
+  fill(0, 0, 0, 160);
+  rect(0, 0, width, height);
+  fill(255, 0, 0);
+  textSize(28);
+  textAlign(CENTER, CENTER);
+  text('GAME OVER', width / 2, height / 2 - 16);
+  fill(255);
+  textSize(14);
+  text('Score: ' + score, width / 2, height / 2 + 14);
+  text('Press R to restart', width / 2, height / 2 + 34);
+}
+
+function showWin() {
+  fill(0, 0, 0, 160);
+  rect(0, 0, width, height);
+  fill(255, 220, 0);
+  textSize(28);
+  textAlign(CENTER, CENTER);
+  text('YOU WIN!', width / 2, height / 2 - 16);
+  fill(255);
+  textSize(14);
+  text('Score: ' + score, width / 2, height / 2 + 14);
+  text('Press R to restart', width / 2, height / 2 + 34);
+}
+
+// ── KEYBOARD INPUT ────────────────────────────────────────────
+function keyPressed() {
+  // Restart
+  if (key === 'r' || key === 'R') {
+    window.location.reload();
+    return;
+  }
+
+  if (gameOver || won) return;
+
+  let nextRow = pacRow;
+  let nextCol = pacCol;
+
+  if (keyCode === UP_ARROW)    { nextRow -= 1; pacDir = 270; }
+  if (keyCode === DOWN_ARROW)  { nextRow += 1; pacDir = 90;  }
+  if (keyCode === LEFT_ARROW)  { nextCol -= 1; pacDir = 180; }
+  if (keyCode === RIGHT_ARROW) { nextCol += 1; pacDir = 0;   }
+
+  if (maze[nextRow][nextCol] !== WALL) {
+    pacRow = nextRow;
+    pacCol = nextCol;
+
+    if (maze[pacRow][pacCol] === PELLET) {
+      maze[pacRow][pacCol] = PATH;
+      score += 10;
+    } else if (maze[pacRow][pacCol] === POWER) {
+      maze[pacRow][pacCol] = PATH;
+      score += 50;
+      scaredTimer = SCARED_TIME;  // start scared mode
+    }
+  }
+}
+  </script>
+  <nav>
+    <a href="day1.html" >Day 1</a>
+    <a href="day2.html" >Day 2</a>
+    <a href="day3.html" class="active">Day 3</a>
+    <a href="day4.html" >Day 4</a>
+  </nav>
+</body>
+</html>

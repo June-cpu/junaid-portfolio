@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pacman Starter — UAU Bootcamp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 24px 16px;
+      font-family: 'Courier New', monospace;
+      color: #fff;
+    }
+    h1 {
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      color: #FFD700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    p.subtitle {
+      font-size: 0.75rem;
+      color: #888;
+      margin-bottom: 20px;
+      letter-spacing: 0.05em;
+    }
+    canvas {
+      display: block;
+      border: 2px solid #333;
+      image-rendering: pixelated;
+    }
+    .hint {
+      margin-top: 16px;
+      font-size: 0.7rem;
+      color: #555;
+      text-align: center;
+      max-width: 420px;
+      line-height: 1.6;
+    }
+    .hint span { color: #888; }
+  </style>
+</head>
+<body>
+
+<h1>🟡 Pacman Bootcamp</h1>
+<p class="subtitle">UAU / Lehman STEP — Starter Code</p>
+
+<!-- p5.js is loaded from CDN — no install needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONSTANTS  — change TILE_SIZE to make everything bigger/smaller
+// ════════════════════════════════════════════════════════════
+const TILE_SIZE = 20;   // each cell is 20×20 pixels
+const COLS      = 21;   // maze is 21 columns wide
+const ROWS      = 21;   // maze is 21 rows tall
+
+const PATH   = 0;  // empty floor — Pacman walks here, no dot
+const WALL   = 1;  // solid wall — nobody passes
+const PELLET = 2;  // small dot — collect for points
+const POWER  = 3;  // big power pellet — lets Pacman eat ghosts
+
+// ════════════════════════════════════════════════════════════
+//  MAZE  ← THIS IS WHAT YOU DESIGN
+//
+//  Rules:
+//    • The outer border (row 0, row 20, col 0, col 20) must ALL be 1s
+//    • Every PATH cell (0 or 2) must be reachable from every other
+//    • Exactly 4 power pellets (3s) recommended
+//    • Every row must have exactly 21 numbers
+// ════════════════════════════════════════════════════════════
+let maze = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // row 0  ← top border (don't touch)
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1], // row 1
+  [1,2,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,2,1], // row 2
+  [1,3,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,3,1], // row 3  ← power pellets top
+  [1,2,1,1,2,2,2,1,1,2,2,2,1,1,2,2,2,1,1,2,1], // row 4
+  [1,2,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,2,1], // row 5
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1], // row 6
+  [1,1,1,1,2,1,1,1,0,0,1,0,0,1,1,1,2,1,1,1,1], // row 7  ← ghost house top
+  [1,1,1,1,2,1,0,0,0,0,1,0,0,0,0,1,2,1,1,1,1], // row 8
+  [1,1,1,1,2,1,0,1,1,0,0,0,1,1,0,1,2,1,1,1,1], // row 9
+  [1,2,2,2,2,0,0,1,0,0,0,0,0,1,0,0,2,2,2,2,1], // row 10 ← ghost house entrance
+  [1,1,1,1,2,1,0,1,1,1,1,1,1,1,0,1,2,1,1,1,1], // row 11
+  [1,1,1,1,2,1,0,0,0,0,1,0,0,0,0,1,2,1,1,1,1], // row 12
+  [1,1,1,1,2,1,1,1,0,0,1,0,0,1,1,1,2,1,1,1,1], // row 13 ← ghost house bottom
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1], // row 14
+  [1,2,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,2,1], // row 15
+  [1,2,1,1,2,2,2,1,1,2,2,2,1,1,2,2,2,1,1,2,1], // row 16
+  [1,3,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,3,1], // row 17 ← power pellets bottom
+  [1,2,1,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,2,1], // row 18
+  [1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1], // row 19
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // row 20 ← bottom border (don't touch)
+];
+
+// ════════════════════════════════════════════════════════════
+//  PACMAN STARTING POSITION  (row, col)
+// ════════════════════════════════════════════════════════════
+let pacRow = 16;
+let pacCol = 10;
+
+// ════════════════════════════════════════════════════════════
+//  p5.js — setup() runs ONCE on load
+// ════════════════════════════════════════════════════════════
+function setup() {
+  let canvas = createCanvas(COLS * TILE_SIZE, ROWS * TILE_SIZE);
+  canvas.parent(document.body); // attach canvas to page
+
+  frameRate(60);
+  noSmooth();       // keep pixels crisp — important for a pixel game
+}
+
+// ════════════════════════════════════════════════════════════
+//  p5.js — draw() runs 60× per second
+// ════════════════════════════════════════════════════════════
+function draw() {
+  background(0);   // wipe the screen black each frame
+
+  drawMaze();      // 1. draw the maze
+  drawPacman();    // 2. draw Pacman on top
+}
+
+// ════════════════════════════════════════════════════════════
+//  drawMaze()  — loops through every cell and draws a tile
+// ════════════════════════════════════════════════════════════
+function drawMaze() {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+
+      let cell = maze[row][col];     // what's in this cell?
+      let x    = col * TILE_SIZE;    // pixel X (left edge of cell)
+      let y    = row * TILE_SIZE;    // pixel Y (top edge of cell)
+
+      if (cell === WALL) {
+        // ── Solid wall ──────────────────────────────────────
+        fill(0, 0, 180);   // classic blue wall
+        noStroke();
+        rect(x, y, TILE_SIZE, TILE_SIZE);
+
+        // Optional: draw a lighter inner edge to give depth
+        fill(0, 0, 220);
+        noStroke();
+        rect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+
+      } else if (cell === PELLET) {
+        // ── Small dot ───────────────────────────────────────
+        fill(0);
+        rect(x, y, TILE_SIZE, TILE_SIZE);  // black background
+
+        fill(255, 255, 200);               // pale yellow dot
+        noStroke();
+        circle(
+          x + TILE_SIZE / 2,              // center X of this cell
+          y + TILE_SIZE / 2,              // center Y of this cell
+          4                               // dot diameter in pixels
+        );
+
+      } else if (cell === POWER) {
+        // ── Big power pellet ────────────────────────────────
+        fill(0);
+        rect(x, y, TILE_SIZE, TILE_SIZE);  // black background
+
+        fill(255, 180, 0);                 // orange glow
+        noStroke();
+        circle(
+          x + TILE_SIZE / 2,
+          y + TILE_SIZE / 2,
+          12                              // bigger than a normal pellet
+        );
+
+      } else {
+        // ── PATH or ghost house (0) ─────────────────────────
+        fill(0);
+        rect(x, y, TILE_SIZE, TILE_SIZE);  // just empty black floor
+      }
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  drawPacman()  — draws the yellow circle at pacRow, pacCol
+// ════════════════════════════════════════════════════════════
+function drawPacman() {
+  let x = pacCol * TILE_SIZE + TILE_SIZE / 2;  // center X in pixels
+  let y = pacRow * TILE_SIZE + TILE_SIZE / 2;  // center Y in pixels
+
+  fill(255, 220, 0);  // yellow
+  noStroke();
+  circle(x, y, TILE_SIZE - 2);  // slightly smaller than the tile
+}
+
+// ════════════════════════════════════════════════════════════
+//  keyPressed()  — moves Pacman when arrow keys are pressed
+//  (Day 1: just teleports. Day 2: we add wall collision + animation)
+// ════════════════════════════════════════════════════════════
+function keyPressed() {
+  let nextRow = pacRow;
+  let nextCol = pacCol;
+
+  if (keyCode === UP_ARROW)    nextRow -= 1;
+  if (keyCode === DOWN_ARROW)  nextRow += 1;
+  if (keyCode === LEFT_ARROW)  nextCol -= 1;
+  if (keyCode === RIGHT_ARROW) nextCol += 1;
+
+  // Only move if the next cell is NOT a wall
+  if (maze[nextRow][nextCol] !== WALL) {
+    pacRow = nextRow;
+    pacCol = nextCol;
+
+    // If Pacman lands on a pellet or power pellet, eat it
+    if (maze[pacRow][pacCol] === PELLET || maze[pacRow][pacCol] === POWER) {
+      maze[pacRow][pacCol] = PATH;  // remove the dot
+    }
+  }
+}
+</script>
+
+<p class="hint">
+  <span>Arrow keys to move.</span><br>
+  Edit the <code>maze</code> array in <code>index.html</code> to design your own level.<br>
+  0 = path &nbsp;·&nbsp; 1 = wall &nbsp;·&nbsp; 2 = pellet &nbsp;·&nbsp; 3 = power pellet
+</p>
+
+</body>
+</html>
