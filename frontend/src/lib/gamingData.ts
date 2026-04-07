@@ -668,6 +668,7 @@ export const GAMING_SESSIONS: Lecture[] = [
         label: '— Challenge 02',
         heading: 'Make It Feel Like YOUR Game',
         body: 'Pacman moves and your maze is playable. Now make it yours. Change at least TWO of the following before the session ends: (1) Wall color — try fill(0, 80, 200) or any RGB you like. (2) Pacman color — he doesn\'t have to be yellow. (3) Pacman start position — move pacRow/pacCol to a different cell. (4) Pellet size — change the 4 in circle(..., 4) to 6 or 8. (5) Mouth speed — change the += 4 in animateMouth to += 2 (slower) or += 8 (frantic). Share your screen when you\'re done.',
+      },
     ] as Slide[],
   },
 
