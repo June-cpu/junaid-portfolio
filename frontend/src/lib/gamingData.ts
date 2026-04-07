@@ -340,7 +340,7 @@ export const GAMING_SESSIONS: Lecture[] = [
         challengeNum: 1,
         label: '— Challenge 01',
         heading: 'Get Your Maze on Screen',
-        body: 'Open the starter Replit project (link on the board). Your starter code already has the constants, the maze variable, and the drawMaze() function stub. Your job: (1) Fill in the maze array with your paper design. Every row must have exactly 21 values. (2) Complete the drawMaze() if/else block with the four tile types. (3) Press the Run button. You should see your maze. Fix any errors using the debugging guide on the previous slide.',
+        body: 'Go to replit.com/@junaidtafader76/WorldlyUncommonBudgetrange — click Fork, rename it with your first name, then hit Run. Your starter code already has the constants, the maze variable, and the drawMaze() function stub. Your job: (1) Fill in the maze array with your paper design. Every row must have exactly 21 values. (2) Complete the drawMaze() if/else block with the four tile types. (3) Press the Run button. You should see your maze. Fix any errors using the debugging guide on the previous slide.',
       },
     ] as Slide[],
   },
@@ -553,7 +553,7 @@ export const GAMING_SESSIONS: Lecture[] = [
         type: 'concept',
         label: '— Step 1 of 4',
         heading: 'Open Your Replit and Add the Starter Code',
-        body: 'Open the starter Repl (link on the board). Your Day 1 maze should already be there. Now add these new variables at the top of sketch.js, right after the maze array:',
+        body: 'Open your forked Repl from Day 1 (replit.com/@junaidtafader76/WorldlyUncommonBudgetrange if you need a fresh copy — fork it and rename with your name). Your Day 1 maze should already be there. Now add these new variables at the top of sketch.js, right after the maze array:',
         items: [
           '// ── ADD THESE after your maze array ──',
           'let pacRow = 16;',
