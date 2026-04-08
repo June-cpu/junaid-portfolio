@@ -288,12 +288,22 @@ let pacRow = 16, pacCol = 10, pacDir = 0;
 let mouthAngle = 0, mouthOpen = true;
 let score = 0;
 
-// NEW: ghost objects
+// ── GHOST SPAWN POSITIONS ─────────────────────────────────────
+// Change row and col to wherever YOU want each ghost to start.
+// Must be a PATH tile (0 in your maze — not a wall).
+let ghostSpawns = [
+  { row: 9,  col: 9  },   // Ghost 1 — red (Blinky)
+  { row: 9,  col: 11 },   // Ghost 2 — pink (Pinky)
+  { row: 11, col: 9  },   // Ghost 3 — cyan (Inky)
+  { row: 11, col: 11 },   // Ghost 4 — orange (Clyde)
+];
+
+// NEW: ghost objects (positions come from ghostSpawns above)
 let ghosts = [
-  { row: 9,  col: 9,  color: [255, 0, 0],     dr: 0,  dc: 1  },
-  { row: 9,  col: 11, color: [255, 184, 255],  dr: 0,  dc: -1 },
-  { row: 11, col: 9,  color: [0, 255, 255],    dr: -1, dc: 0  },
-  { row: 11, col: 11, color: [255, 184, 81],   dr: 1,  dc: 0  },
+  { row: ghostSpawns[0].row, col: ghostSpawns[0].col, color: [255, 0, 0],     dr: 0,  dc: 1  },
+  { row: ghostSpawns[1].row, col: ghostSpawns[1].col, color: [255, 184, 255],  dr: 0,  dc: -1 },
+  { row: ghostSpawns[2].row, col: ghostSpawns[2].col, color: [0, 255, 255],    dr: -1, dc: 0  },
+  { row: ghostSpawns[3].row, col: ghostSpawns[3].col, color: [255, 184, 81],   dr: 1,  dc: 0  },
 ];
 
 let scaredTimer = 0;
@@ -379,10 +389,12 @@ function moveGhosts() {
 
 // NEW: ghost hits Pacman → game over (or eat ghost if scared)
 function checkGhostCollision() {
-  for (let g of ghosts) {
+  for (let i = 0; i < ghosts.length; i++) {
+    let g = ghosts[i];
     if (g.row===pacRow && g.col===pacCol) {
       if (scaredTimer > 0) {
-        g.row = 9+floor(random(3)); g.col = 9+floor(random(3)); score += 200;
+        // Send eaten ghost back to its spawn point
+        g.row = ghostSpawns[i].row; g.col = ghostSpawns[i].col; score += 200;
       } else { gameOver = true; }
     }
   }
@@ -469,15 +481,25 @@ let gameOver = false;
 let scaredTimer = 0, ghostMoveTimer = 0, ghostSpeed;
 let ghosts;
 
+// ── GHOST SPAWN POSITIONS ─────────────────────────────────────
+// Change row and col to wherever YOU want each ghost to start.
+// Must be a PATH tile (0 in your maze — not a wall).
+let ghostSpawns = [
+  { row: 9,  col: 9  },   // Ghost 1 — red (Blinky)
+  { row: 9,  col: 11 },   // Ghost 2 — pink (Pinky)
+  { row: 11, col: 9  },   // Ghost 3 — cyan (Inky)
+  { row: 11, col: 11 },   // Ghost 4 — orange (Clyde)
+];
+
 function resetPositions() {
   pacRow=16; pacCol=10; pacDir=0; mouthAngle=0; mouthOpen=true;
   scaredTimer=0; ghostMoveTimer=0;
   ghostSpeed = Math.max(5, 15 - (level-1)*2);  // faster each level
   ghosts = [
-    { row:9,  col:9,  color:[255,0,0],    dr:0,  dc:1  },
-    { row:9,  col:11, color:[255,184,255],dr:0,  dc:-1 },
-    { row:11, col:9,  color:[0,255,255],  dr:-1, dc:0  },
-    { row:11, col:11, color:[255,184,81], dr:1,  dc:0  },
+    { row: ghostSpawns[0].row, col: ghostSpawns[0].col, color:[255,0,0],    dr:0,  dc:1  },
+    { row: ghostSpawns[1].row, col: ghostSpawns[1].col, color:[255,184,255],dr:0,  dc:-1 },
+    { row: ghostSpawns[2].row, col: ghostSpawns[2].col, color:[0,255,255],  dr:-1, dc:0  },
+    { row: ghostSpawns[3].row, col: ghostSpawns[3].col, color:[255,184,81], dr:1,  dc:0  },
   ];
 }
 
