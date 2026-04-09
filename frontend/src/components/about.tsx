@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { track } from '@/lib/tracker';
 
@@ -27,7 +27,6 @@ const TREE = [
     id: 'teaching',
     label: 'Teaching',
     meta: 'Lead Teacher · Stem Action NYC',
-    color: 'var(--accent)',
     children: [
       {
         id: 'robotics',
@@ -54,7 +53,7 @@ const TREE = [
         id: 'gaming',
         label: 'Game Design Bootcamp',
         meta: 'UAU / Lehman STEP · p5.js · Grades 7–12 · 20 hrs',
-        description: 'A Pacman-based game design bootcamp teaching how games store data, player movement, enemy AI, and polish — students ship a working game.',
+        description: 'A Pacman-based bootcamp teaching how games store data, player movement, enemy AI, and polish — students ship a working game.',
         groups: [
           {
             label: 'Spring Break Sprint · In-Person',
@@ -90,14 +89,13 @@ const TREE = [
     id: 'workforce',
     label: 'Workforce Development',
     meta: 'Employment Specialist · United Activities Unlimited',
-    color: 'var(--accent)',
     children: [
       {
         id: 'syep',
         label: 'NYC SYEP Program',
         meta: 'NYC Dept. of Youth & Community Development · Staten Island',
         description:
-          'Supervising a team of Worksite Monitors within the Summer Youth Employment Program — recruiting host sites, conducting compliance audits, and mentoring youth participants across Staten Island.',
+          'Supervising a team of Worksite Monitors within the Summer Youth Employment Program — recruiting host sites, conducting compliance audits, and mentoring youth participants.',
         leaves: [
           { id: 'syep-1', label: 'Worksite Monitor Supervision', href: null },
           { id: 'syep-2', label: 'Host Site Recruitment & Onboarding', href: null },
@@ -111,7 +109,6 @@ const TREE = [
     id: 'tutoring',
     label: 'Math Tutoring',
     meta: 'Private · One-on-one · Remote & In-person',
-    color: 'var(--accent)',
     children: [
       {
         id: 'math-private',
@@ -132,7 +129,6 @@ const TREE = [
     id: 'software',
     label: 'Software',
     meta: 'CS Student · Hunter College, CUNY',
-    color: 'var(--accent)',
     children: [
       {
         id: 'projects',
@@ -153,197 +149,154 @@ const TREE = [
 ];
 
 /* ─────────────────────── leaf node ─────────────────────── */
-function LeafNode({
-  leaf,
-  isMobile,
-}: {
+function LeafNode({ leaf }: {
   leaf: { id: string; label: string; href: string | null; external?: boolean };
-  isMobile: boolean;
 }) {
   const [hover, setHover] = useState(false);
 
   if (!leaf.href) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '3px 0' }}>
-        <div style={{ width: 1, height: 14, background: 'var(--ink-faint)', opacity: 0.3 }} />
-        <span style={{
-          fontFamily: 'DM Mono, monospace', fontSize: '0.56rem',
-          letterSpacing: '0.06em', color: 'var(--ink-faint)', opacity: 0.6,
-        }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '5px 0' }}>
+        <div style={{ width: 16, height: 1, background: 'var(--ink-faint)', opacity: 0.25 }} />
+        <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.06em', color: 'var(--ink-faint)', opacity: 0.5 }}>
           {leaf.label}
         </span>
       </div>
     );
   }
 
-  const isExternal = leaf.external;
-  const linkProps = isExternal
-    ? { href: leaf.href, target: '_blank', rel: 'noreferrer' }
-    : { href: leaf.href };
-
   const inner = (
     <div
-      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '3px 0' }}
+      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '5px 0' }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
       <div style={{
-        width: 1, height: 14,
+        width: 16, height: 1,
         background: hover ? 'var(--accent)' : 'var(--ink-faint)',
         opacity: hover ? 1 : 0.3,
         transition: 'background 0.2s, opacity 0.2s',
+        flexShrink: 0,
       }} />
       <span style={{
-        fontFamily: 'DM Mono, monospace', fontSize: '0.56rem',
-        letterSpacing: '0.06em',
+        fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.06em',
         color: hover ? 'var(--accent)' : 'var(--ink-light)',
         transition: 'color 0.2s',
-        cursor: 'pointer',
       }}>
-        {leaf.label} {isExternal ? '↗' : '→'}
+        {leaf.label} {leaf.external ? '↗' : '→'}
       </span>
     </div>
   );
 
-  return isExternal ? (
-    <a {...linkProps} style={{ textDecoration: 'none' }} onClick={() => track('click', { element: 'tree-leaf', id: leaf.id })}>
+  return leaf.external ? (
+    <a href={leaf.href} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}
+      onClick={() => track('click', { element: 'tree-leaf', id: leaf.id })}>
       {inner}
     </a>
   ) : (
-    <Link href={leaf.href} style={{ textDecoration: 'none' }} onClick={() => track('click', { element: 'tree-leaf', id: leaf.id })}>
+    <Link href={leaf.href} style={{ textDecoration: 'none' }}
+      onClick={() => track('click', { element: 'tree-leaf', id: leaf.id })}>
       {inner}
     </Link>
   );
 }
 
 /* ─────────────────────── sub-branch ─────────────────────── */
-function SubBranch({
-  branch,
-  isMobile,
-  depth,
-}: {
+function SubBranch({ branch, isMobile }: {
   branch: {
-    id: string;
-    label: string;
-    meta: string;
-    description: string;
+    id: string; label: string; meta: string; description: string;
     leaves?: { id: string; label: string; href: string | null; external?: boolean }[];
-    groups?: {
-      label: string;
-      leaves: { id: string; label: string; href: string | null; external?: boolean }[];
-    }[];
+    groups?: { label: string; leaves: { id: string; label: string; href: string | null; external?: boolean }[] }[];
   };
   isMobile: boolean;
-  depth: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [hover, setHover] = useState(false);
 
   return (
-    <div style={{ display: 'flex', gap: 0 }}>
-      {/* Vertical connector */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 24, flexShrink: 0 }}>
-        <div style={{ width: 1, flex: 1, minHeight: 8, background: 'var(--ink-faint)', opacity: 0.25 }} />
-        {/* Node dot */}
+    <div style={{ display: 'flex', gap: 0, marginBottom: 4 }}>
+      {/* Sub-trunk */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 20, flexShrink: 0 }}>
+        <div style={{ width: 1, flex: '0 0 12px', background: 'var(--ink-faint)', opacity: 0.2 }} />
         <div style={{
-          width: 5, height: 5, borderRadius: '50%',
+          width: 6, height: 6, borderRadius: '50%',
           background: hover || expanded ? 'var(--accent)' : 'var(--ink-faint)',
-          transition: 'background 0.2s',
+          opacity: hover || expanded ? 1 : 0.35,
+          transition: 'background 0.2s, opacity 0.2s',
           flexShrink: 0,
         }} />
-        {expanded && <div style={{ width: 1, flex: 1, background: 'var(--ink-faint)', opacity: 0.25 }} />}
+        {expanded && <div style={{ width: 1, flex: 1, minHeight: 8, background: 'var(--ink-faint)', opacity: 0.2 }} />}
       </div>
 
-      {/* Content */}
-      <div style={{ flex: 1, paddingBottom: expanded ? 20 : 6 }}>
-        {/* Branch header */}
+      <div style={{ flex: 1 }}>
         <button
-          onClick={() => {
-            setExpanded(e => !e);
-            track('click', { element: 'tree-subbranch', id: branch.id });
-          }}
+          onClick={() => { setExpanded(e => !e); track('click', { element: 'tree-subbranch', id: branch.id }); }}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            background: 'none', border: 'none', cursor: 'pointer',
-            padding: '8px 0', width: '100%', textAlign: 'left',
-          }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0 6px 16px', width: '100%', textAlign: 'left' }}
         >
-          {/* Horizontal connector */}
-          <div style={{
-            width: 20, height: 1,
-            background: hover || expanded ? 'var(--accent)' : 'var(--ink-faint)',
-            opacity: hover || expanded ? 1 : 0.4,
-            transition: 'background 0.2s, opacity 0.2s',
-            flexShrink: 0,
-          }} />
-
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
-              fontFamily: 'Cormorant Garamond, serif', fontWeight: 300,
-              fontSize: isMobile ? '1rem' : '1.1rem',
-              color: hover || expanded ? 'var(--ink)' : 'var(--ink-light)',
-              letterSpacing: '-0.01em',
-              transition: 'color 0.2s',
-            }}>
-              {branch.label}
+              width: 28, height: 1,
+              background: hover || expanded ? 'var(--accent)' : 'var(--ink-faint)',
+              opacity: hover || expanded ? 1 : 0.3,
+              transition: 'background 0.2s, opacity 0.2s',
+              flexShrink: 0,
+            }} />
+            <div>
               <span style={{
-                fontFamily: 'DM Mono, monospace', fontSize: '0.55rem',
-                letterSpacing: '0.1em', color: 'var(--ink-faint)',
-                marginLeft: 10, opacity: 0.6,
+                fontFamily: 'Cormorant Garamond, serif', fontWeight: 300,
+                fontSize: isMobile ? '1.05rem' : '1.2rem',
+                color: hover || expanded ? 'var(--ink)' : 'var(--ink-light)',
+                letterSpacing: '-0.01em',
+                transition: 'color 0.2s',
+              }}>
+                {branch.label}
+              </span>
+              <span style={{
+                fontFamily: 'DM Mono, monospace', fontSize: '0.52rem',
+                color: 'var(--ink-faint)', marginLeft: 10, opacity: 0.5,
               }}>
                 {expanded ? '−' : '+'}
               </span>
-            </div>
-            <div style={{
-              fontFamily: 'DM Mono, monospace', fontSize: '0.52rem',
-              letterSpacing: '0.06em', color: 'var(--accent)',
-              opacity: 0.8, marginTop: 2,
-            }}>
-              {branch.meta}
+              <div style={{
+                fontFamily: 'DM Mono, monospace', fontSize: '0.52rem',
+                letterSpacing: '0.06em', color: 'var(--accent)', opacity: 0.75, marginTop: 3,
+              }}>
+                {branch.meta}
+              </div>
             </div>
           </div>
         </button>
 
-        {/* Expandable content */}
         <div style={{
           overflow: 'hidden',
           maxHeight: expanded ? '2000px' : '0',
           transition: 'max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
         }}>
-          <div style={{ paddingLeft: 32, paddingTop: 4, paddingBottom: 8 }}>
-            {/* Description */}
+          <div style={{ paddingLeft: 44, paddingTop: 8, paddingBottom: 16 }}>
             <p style={{
               fontSize: '0.65rem', lineHeight: 1.9, color: 'var(--ink-light)',
-              fontWeight: 300, maxWidth: 480, marginBottom: 16, opacity: 0.8,
+              fontWeight: 300, maxWidth: 560, marginBottom: 16, opacity: 0.8,
             }}>
               {branch.description}
             </p>
-
-            {/* Flat leaves */}
             {branch.leaves && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {branch.leaves.map(leaf => (
-                  <LeafNode key={leaf.id} leaf={leaf} isMobile={isMobile} />
-                ))}
+                {branch.leaves.map(leaf => <LeafNode key={leaf.id} leaf={leaf} />)}
               </div>
             )}
-
-            {/* Grouped leaves */}
             {branch.groups && branch.groups.map((group, gi) => (
-              <div key={gi} style={{ marginBottom: 14 }}>
+              <div key={gi} style={{ marginBottom: 16 }}>
                 <div style={{
-                  fontFamily: 'DM Mono, monospace', fontSize: '0.5rem',
+                  fontFamily: 'DM Mono, monospace', fontSize: '0.49rem',
                   letterSpacing: '0.14em', textTransform: 'uppercase',
-                  color: 'var(--ink-faint)', marginBottom: 6, opacity: 0.5,
+                  color: 'var(--ink-faint)', marginBottom: 6, opacity: 0.45,
                 }}>
                   {group.label}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {group.leaves.map(leaf => (
-                    <LeafNode key={leaf.id} leaf={leaf} isMobile={isMobile} />
-                  ))}
+                  {group.leaves.map(leaf => <LeafNode key={leaf.id} leaf={leaf} />)}
                 </div>
               </div>
             ))}
@@ -355,110 +308,93 @@ function SubBranch({
 }
 
 /* ─────────────────────── main branch ─────────────────────── */
-function MainBranch({
-  branch,
-  isMobile,
-  isLast,
-}: {
+function MainBranch({ branch, isLast, isMobile }: {
   branch: (typeof TREE)[0];
-  isMobile: boolean;
   isLast: boolean;
+  isMobile: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [hover, setHover] = useState(false);
 
   return (
-    <div style={{ display: 'flex', gap: 0, minHeight: 0 }}>
-      {/* Trunk segment */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 2, flexShrink: 0, marginRight: 0 }}>
-        <div style={{ width: 2, flex: '0 0 28px', background: 'var(--ink)', opacity: 0.12 }} />
-        {/* Branch origin node */}
+    <div style={{ display: 'flex', minHeight: 0 }}>
+      {/* Trunk */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 2, flexShrink: 0 }}>
+        <div style={{ width: 2, flex: '0 0 32px', background: 'var(--ink)', opacity: 0.1 }} />
         <div style={{
-          width: 8, height: 8, borderRadius: '50%',
+          width: 10, height: 10, borderRadius: '50%',
           background: expanded || hover ? 'var(--accent)' : 'var(--ink)',
-          opacity: expanded || hover ? 1 : 0.3,
+          opacity: expanded || hover ? 1 : 0.2,
           transition: 'background 0.25s, opacity 0.25s',
-          flexShrink: 0,
-          zIndex: 1,
+          flexShrink: 0, zIndex: 1,
         }} />
-        {!isLast && (
-          <div style={{ width: 2, flex: 1, minHeight: 20, background: 'var(--ink)', opacity: 0.12 }} />
-        )}
+        {!isLast && <div style={{ width: 2, flex: 1, minHeight: 40, background: 'var(--ink)', opacity: 0.1 }} />}
       </div>
 
-      {/* Branch content */}
+      {/* Content */}
       <div style={{ flex: 1, paddingBottom: isLast ? 0 : 0 }}>
-        {/* Main branch header */}
         <button
-          onClick={() => {
-            setExpanded(e => !e);
-            track('click', { element: 'tree-branch', id: branch.id });
-          }}
+          onClick={() => { setExpanded(e => !e); track('click', { element: 'tree-branch', id: branch.id }); }}
           onMouseEnter={() => setHover(true)}
           onMouseLeave={() => setHover(false)}
           style={{
-            display: 'flex', alignItems: 'center', gap: 0,
             background: 'none', border: 'none', cursor: 'pointer',
-            padding: 0, paddingBottom: 4, width: '100%', textAlign: 'left',
+            padding: '0 0 6px 0', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center',
           }}
         >
-          {/* Horizontal connector from trunk */}
+          {/* Horizontal arm */}
           <div style={{
-            width: 24, height: 2,
+            width: 40, height: 2,
             background: hover || expanded ? 'var(--accent)' : 'var(--ink)',
-            opacity: hover || expanded ? 1 : 0.18,
+            opacity: hover || expanded ? 1 : 0.15,
             transition: 'background 0.25s, opacity 0.25s',
-            flexShrink: 0,
-            marginTop: 1,
+            flexShrink: 0, marginTop: 1,
           }} />
 
-          <div style={{ paddingLeft: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ paddingLeft: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
               <h3 style={{
                 fontFamily: 'Cormorant Garamond, serif', fontWeight: 300,
-                fontSize: isMobile ? 'clamp(1.3rem, 5vw, 1.6rem)' : 'clamp(1.4rem, 2.2vw, 1.8rem)',
-                color: hover || expanded ? 'var(--ink)' : 'var(--ink)',
+                fontSize: isMobile ? 'clamp(1.5rem, 5.5vw, 2rem)' : 'clamp(1.8rem, 2.5vw, 2.4rem)',
+                color: 'var(--ink)',
                 letterSpacing: '-0.02em', margin: 0,
-                transition: 'color 0.2s',
-                opacity: hover || expanded ? 1 : 0.75,
+                opacity: hover || expanded ? 1 : 0.65,
+                transition: 'opacity 0.2s',
               }}>
                 {branch.label}
               </h3>
               <span style={{
                 fontFamily: 'DM Mono, monospace', fontSize: '0.52rem',
-                letterSpacing: '0.1em', color: 'var(--ink-faint)',
-                opacity: 0.5,
+                letterSpacing: '0.1em', color: 'var(--ink-faint)', opacity: 0.45,
               }}>
                 {expanded ? '−' : '+'}
               </span>
             </div>
             <div style={{
-              fontFamily: 'DM Mono, monospace', fontSize: '0.53rem',
+              fontFamily: 'DM Mono, monospace', fontSize: '0.54rem',
               letterSpacing: '0.08em', color: 'var(--accent)',
-              opacity: hover || expanded ? 0.9 : 0.5,
-              transition: 'opacity 0.2s',
-              marginTop: 3,
+              opacity: hover || expanded ? 0.85 : 0.4,
+              transition: 'opacity 0.2s', marginTop: 4,
             }}>
               {branch.meta}
             </div>
           </div>
         </button>
 
-        {/* Expanded children */}
+        {/* Children */}
         <div style={{
           overflow: 'hidden',
           maxHeight: expanded ? '5000px' : '0',
-          paddingLeft: 36,
-          marginTop: expanded ? 12 : 0,
-          transition: 'max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.3s',
-        } as React.CSSProperties}>
+          transition: 'max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+          paddingLeft: 60,
+          marginTop: expanded ? 16 : 0,
+        }}>
           {branch.children.map(sub => (
-            <SubBranch key={sub.id} branch={sub as any} isMobile={isMobile} depth={1} />
+            <SubBranch key={sub.id} branch={sub as any} isMobile={isMobile} />
           ))}
         </div>
 
-        {/* Spacing after branch */}
-        <div style={{ height: expanded ? 24 : 4, transition: 'height 0.3s' }} />
+        <div style={{ height: expanded ? 40 : 8, transition: 'height 0.3s' }} />
       </div>
     </div>
   );
@@ -471,8 +407,7 @@ export default function About() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Small delay for mount animation
-    const t = setTimeout(() => setMounted(true), 100);
+    const t = setTimeout(() => setMounted(true), 80);
     return () => clearTimeout(t);
   }, []);
 
@@ -484,25 +419,17 @@ export default function About() {
         background: 'var(--cream-dark)',
         padding: `80px ${sidePad} 120px`,
         position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
       }}
     >
-      <div style={{
-        maxWidth: isLargeDesktop ? 1600 : undefined,
-        margin: isLargeDesktop ? '0 auto' : undefined,
-        width: '100%',
-      }}>
+      <div style={{ maxWidth: isLargeDesktop ? 1600 : undefined, margin: isLargeDesktop ? '0 auto' : undefined, width: '100%' }}>
+
         {/* Corner markers */}
         <span style={{ position: 'absolute', fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--ink-faint)', top: 20, left: 24 }}>03</span>
         <span style={{ position: 'absolute', fontSize: '0.55rem', letterSpacing: '0.1em', color: 'var(--ink-faint)', top: 20, right: 24 }}>About</span>
 
         {/* Section header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: isMobile ? 48 : 72 }}>
-          <span style={{
-            fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.2em',
-            textTransform: 'uppercase', color: 'var(--accent)',
-          }}>— About Me</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: isMobile ? 40 : 56 }}>
+          <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--accent)' }}>— About Me</span>
           <div style={{ flex: 1, height: 1, background: 'var(--ink-faint)', opacity: 0.4 }} />
           <h2 style={{
             fontFamily: 'Cormorant Garamond, serif', fontWeight: 300,
@@ -511,164 +438,128 @@ export default function About() {
           }}>What I Do</h2>
         </div>
 
-        {/* Layout: bio left, tree right (or stacked on mobile) */}
+        {/* ── Top row: bio + resume ── */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile || isTablet ? '1fr' : '280px 1fr',
-          gap: isMobile ? 48 : isTablet ? 48 : 80,
-          alignItems: 'start',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 320px',
+          gap: isMobile ? 32 : 64,
+          marginBottom: isMobile ? 56 : 80,
+          paddingBottom: isMobile ? 40 : 56,
+          borderBottom: '1px solid var(--ink-faint)',
+          opacity: 0.9,
         }}>
-
-          {/* ── Left panel: bio + resume + education ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-            {/* Bio */}
-            <p style={{
-              fontSize: '0.72rem', lineHeight: 2.0, color: 'var(--ink-light)',
-              fontWeight: 300,
-            }}>
+          {/* Bio */}
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
+            <p style={{ fontSize: '0.72rem', lineHeight: 2.0, color: 'var(--ink-light)', fontWeight: 300, maxWidth: 540 }}>
               I'm a CS student at Hunter College who splits his time between writing software,
               teaching others, and helping people find work. I believe in learning by building —
               whether that's a data pipeline, a classroom lesson, or a career path for someone
               who needs it.
             </p>
-
-            {/* Resume block */}
-            <div style={{
-              border: '1px solid var(--ink-faint)',
-              borderLeft: '3px solid var(--accent)',
-              padding: '24px 28px',
-              background: 'var(--cream)',
-            }}>
-              <div style={{
-                fontSize: '0.55rem', letterSpacing: '0.18em', textTransform: 'uppercase',
-                color: 'var(--ink-faint)', marginBottom: 12,
-              }}>
-                — Resume
-              </div>
-              <p style={{
-                fontFamily: 'Cormorant Garamond, serif', fontWeight: 300,
-                fontSize: '1.3rem', color: 'var(--ink)', letterSpacing: '-0.01em',
-                marginBottom: 20,
-              }}>
-                Junaid Tafader
-              </p>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <a
-                  href="/Junaid_1.pdf"
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => track('click', { element: 'resume-view' })}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                    padding: '10px 18px',
-                    background: 'var(--ink)', color: 'var(--cream)',
-                    fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.1em',
-                    textTransform: 'uppercase', textDecoration: 'none',
-                    transition: 'background 0.2s',
-                    cursor: 'none',
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--accent)'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--ink)'; }}
-                >
-                  View PDF ↗
-                </a>
-                <a
-                  href="/Junaid_1.pdf"
-                  download
-                  onClick={() => track('click', { element: 'resume-download' })}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                    padding: '10px 18px',
-                    border: '1px solid var(--ink-faint)',
-                    color: 'var(--ink-light)', textDecoration: 'none',
-                    fontFamily: 'DM Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    transition: 'color 0.2s, border-color 0.2s',
-                    cursor: 'none',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = 'var(--accent)';
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--accent)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink-light)';
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--ink-faint)';
-                  }}
-                >
-                  Download ↓
-                </a>
-              </div>
-            </div>
-
-            {/* Education */}
-            <div style={{
-              fontSize: '0.6rem', letterSpacing: '0.08em', color: 'var(--ink-faint)',
-              borderTop: '1px solid var(--ink-faint)', paddingTop: 20, opacity: 0.6,
-            }}>
+            <div style={{ fontSize: '0.6rem', letterSpacing: '0.08em', color: 'var(--ink-faint)', opacity: 0.6 }}>
               B.S. Computer Science · Hunter College, CUNY · Expected 2026
-            </div>
-
-            {/* Hint */}
-            <div style={{
-              fontFamily: 'DM Mono, monospace',
-              fontSize: '0.5rem', letterSpacing: '0.1em',
-              color: 'var(--ink-faint)', opacity: 0.4,
-              borderTop: '1px solid var(--ink-faint)', paddingTop: 16,
-            }}>
-              click a branch to explore →
             </div>
           </div>
 
-          {/* ── Right panel: tree ── */}
+          {/* Resume */}
           <div style={{
-            opacity: mounted ? 1 : 0,
-            transform: mounted ? 'none' : 'translateY(12px)',
-            transition: 'opacity 0.6s ease, transform 0.6s ease',
+            border: '1px solid var(--ink-faint)',
+            borderLeft: '3px solid var(--accent)',
+            padding: isMobile ? '20px 20px' : '24px 28px',
+            background: 'var(--cream)',
+            alignSelf: 'start',
           }}>
-            {/* Tree root label */}
-            <div style={{
-              fontFamily: 'DM Mono, monospace', fontSize: '0.52rem',
-              letterSpacing: '0.14em', textTransform: 'uppercase',
-              color: 'var(--ink-faint)', opacity: 0.4,
-              marginBottom: 16, paddingLeft: 2,
+            <div style={{ fontSize: '0.52rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--ink-faint)', marginBottom: 10 }}>
+              — Resume
+            </div>
+            <p style={{
+              fontFamily: 'Cormorant Garamond, serif', fontWeight: 300,
+              fontSize: '1.25rem', color: 'var(--ink)', letterSpacing: '-0.01em', marginBottom: 18,
             }}>
               Junaid Tafader
+            </p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <a href="/Junaid_1.pdf" target="_blank" rel="noreferrer"
+                onClick={() => track('click', { element: 'resume-view' })}
+                style={{
+                  display: 'inline-flex', alignItems: 'center',
+                  padding: '9px 16px', background: 'var(--ink)', color: 'var(--cream)',
+                  fontFamily: 'DM Mono, monospace', fontSize: '0.57rem', letterSpacing: '0.1em',
+                  textTransform: 'uppercase', textDecoration: 'none', transition: 'background 0.2s', cursor: 'none',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--accent)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--ink)'; }}
+              >
+                View PDF ↗
+              </a>
+              <a href="/Junaid_1.pdf" download
+                onClick={() => track('click', { element: 'resume-download' })}
+                style={{
+                  display: 'inline-flex', alignItems: 'center',
+                  padding: '9px 16px', border: '1px solid var(--ink-faint)',
+                  color: 'var(--ink-light)', textDecoration: 'none',
+                  fontFamily: 'DM Mono, monospace', fontSize: '0.57rem', letterSpacing: '0.1em',
+                  textTransform: 'uppercase', transition: 'color 0.2s, border-color 0.2s', cursor: 'none',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.color = 'var(--accent)';
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--accent)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.color = 'var(--ink-light)';
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--ink-faint)';
+                }}
+              >
+                Download ↓
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Tree ── */}
+        <div style={{
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'none' : 'translateY(10px)',
+          transition: 'opacity 0.5s ease, transform 0.5s ease',
+        }}>
+          {/* Root label */}
+          <div style={{
+            fontFamily: 'DM Mono, monospace', fontSize: '0.5rem',
+            letterSpacing: '0.16em', textTransform: 'uppercase',
+            color: 'var(--ink-faint)', opacity: 0.35, marginBottom: 20,
+            paddingLeft: 2,
+          }}>
+            Junaid Tafader
+          </div>
+
+          {/* Root dot + trunk + branches */}
+          <div style={{ display: 'flex' }}>
+            {/* Root node */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 2, flexShrink: 0 }}>
+              <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--ink)', opacity: 0.18, flexShrink: 0 }} />
             </div>
 
-            {/* Root stem + branches */}
-            <div style={{ display: 'flex', gap: 0 }}>
-              {/* The main vertical trunk */}
-              <div style={{
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', width: 2, flexShrink: 0,
-              }}>
-                {/* Root node */}
-                <div style={{
-                  width: 10, height: 10, borderRadius: '50%',
-                  background: 'var(--ink)', opacity: 0.25, flexShrink: 0,
-                }} />
-                {/* Full trunk line is handled inside each MainBranch */}
-              </div>
-
-              {/* Branches */}
-              <div style={{ flex: 1 }}>
-                {TREE.map((branch, i) => (
-                  <MainBranch
-                    key={branch.id}
-                    branch={branch}
-                    isMobile={isMobile}
-                    isLast={i === TREE.length - 1}
-                  />
-                ))}
-              </div>
+            {/* Branches */}
+            <div style={{ flex: 1 }}>
+              {TREE.map((branch, i) => (
+                <MainBranch
+                  key={branch.id}
+                  branch={branch}
+                  isMobile={isMobile}
+                  isLast={i === TREE.length - 1}
+                />
+              ))}
             </div>
+          </div>
 
-            {/* Ground / root line */}
-            <div style={{
-              marginTop: 8, marginLeft: 2,
-              width: 40, height: 2,
-              background: 'var(--ink)', opacity: 0.08,
-            }} />
+          {/* Hint */}
+          <div style={{
+            marginTop: 40,
+            fontFamily: 'DM Mono, monospace', fontSize: '0.49rem',
+            letterSpacing: '0.12em', color: 'var(--ink-faint)', opacity: 0.3,
+            paddingLeft: 2,
+          }}>
+            click a branch to explore →
           </div>
         </div>
       </div>
