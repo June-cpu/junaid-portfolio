@@ -75,13 +75,23 @@ let mouthOpen  = true;
 let score = 0;
 
 // ── GHOSTS (NEW in Day 3) ─────────────────────────────────────
+// ── GHOST SPAWN POSITIONS ─────────────────────────────────────
+// Change row and col to wherever YOU want each ghost to start.
+// Must be a PATH tile (0 in your maze — not a wall).
+let ghostSpawns = [
+  { row: 9,  col: 9  },   // Ghost 1 — red (Blinky)
+  { row: 9,  col: 11 },   // Ghost 2 — pink (Pinky)
+  { row: 11, col: 9  },   // Ghost 3 — cyan (Inky)
+  { row: 11, col: 11 },   // Ghost 4 — orange (Clyde)
+];
+
 // Each ghost: { row, col, color, dr, dc }
 // dr/dc = current movement direction (+1 or -1 for row or col)
 let ghosts = [
-  { row: 9,  col: 9,  color: [255, 0,   0  ], dr: 0,  dc: 1  },  // Blinky (red)
-  { row: 9,  col: 11, color: [255, 184, 255], dr: 0,  dc: -1 },  // Pinky  (pink)
-  { row: 11, col: 9,  color: [0,   255, 255], dr: -1, dc: 0  },  // Inky   (cyan)
-  { row: 11, col: 11, color: [255, 184, 81 ], dr: 1,  dc: 0  },  // Clyde  (orange)
+  { row: ghostSpawns[0].row, col: ghostSpawns[0].col, color: [255, 0,   0  ], dr: 0,  dc: 1  },  // Blinky (red)
+  { row: ghostSpawns[1].row, col: ghostSpawns[1].col, color: [255, 184, 255], dr: 0,  dc: -1 },  // Pinky  (pink)
+  { row: ghostSpawns[2].row, col: ghostSpawns[2].col, color: [0,   255, 255], dr: -1, dc: 0  },  // Inky   (cyan)
+  { row: ghostSpawns[3].row, col: ghostSpawns[3].col, color: [255, 184, 81 ], dr: 1,  dc: 0  },  // Clyde  (orange)
 ];
 
 let scaredTimer   = 0;     // counts down when ghosts are scared (blue)
@@ -230,12 +240,13 @@ function moveGhosts() {
 
 // ── CHECK GHOST COLLISION (NEW in Day 3) ──────────────────────
 function checkGhostCollision() {
-  for (let g of ghosts) {
+  for (let i = 0; i < ghosts.length; i++) {
+    let g = ghosts[i];
     if (g.row === pacRow && g.col === pacCol) {
       if (scaredTimer > 0) {
-        // Eat the ghost — send it back to the ghost house
-        g.row = 9 + floor(random(3));
-        g.col = 9 + floor(random(3));
+        // Eat the ghost — send it back to its spawn point
+        g.row = ghostSpawns[i].row;
+        g.col = ghostSpawns[i].col;
         score += 200;
       } else {
         gameOver = true;
